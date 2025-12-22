@@ -1,0 +1,11 @@
+<pile>
+    <filler height="1"><text class="custom">Hello, world</text></filler>
+    <filler valign="top"><text
+            class="dark"
+        >This should look different</text></filler>
+    <filler><button>Quit</button></filler>
+    <columns height="1">
+        <filler weight="75"><text class="col1">Col 1</text></filler>
+        <filler weight="25"><text class="col2">Col 2</text></filler>
+    </columns>
+</pile>

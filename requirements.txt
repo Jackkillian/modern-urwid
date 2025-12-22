@@ -1,0 +1,6 @@
+urwid
+tinycss2
+cssselect2
+lxml
+cssutils
+dict_hash

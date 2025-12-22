@@ -1,0 +1,49 @@
+text {
+    color: white;
+    background: dark red;
+}
+
+.custom {
+    background: dark gray;
+}
+
+.dark {
+    color: black;
+    background: white;
+}
+
+#light {
+    color: white;
+    background: black;
+}
+
+button {
+    color: light blue;
+}
+
+button:focus {
+    color: light red;
+}
+
+edit,
+text:focus:hover,
+#texthover {
+    color: light blue;
+}
+
+text.my_class {
+    color: green;
+}
+
+#id:focus {
+    color: light blue;
+}
+
+.col1 {
+    background: dark blue;
+}
+
+.col2 {
+    color: black;
+    background: brown;
+}
