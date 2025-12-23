@@ -84,33 +84,6 @@ def create_text_widget(cls, el, **kw):
         return cls(**kw)
 
 
-def get_widget_constructor(tag):
-    if tag in WIDGET_MAP:
-        return WIDGET_MAP[tag]
-        if isinstance(cls, (urwid.WidgetContainerMixin, urwid.WidgetDecoration)):
-            return lambda el, children, **kw: WIDGET_MAP[tag](children, **kw)
-        else:
-            return lambda el, **kw: WIDGET_MAP[tag](
-                el.text.strip() if el.text else "", **kw
-            )
-    cls = find_urwid_class(tag)
-    if issubclass(
-        cls,
-        urwid.WidgetContainerMixin,
-    ):
-        return lambda el, children, **kw: cls(children, **kw)
-    elif issubclass(
-        cls,
-        urwid.WidgetDecoration,
-    ):
-        return lambda el, children, **kw: cls(children[0], **kw)
-    elif issubclass(cls, urwid.Widget):
-        return lambda el, **kw: create_text_widget(cls, el, **kw)
-    else:
-        # TODO: parse custom widgets or just return None if none found
-        return None
-
-
 class Layout:
     def __init__(self, xml_path, css_path) -> None:
         xml = open(xml_path).read()
@@ -201,13 +174,10 @@ class Layout:
         height = kwargs.pop(f"{XML_NS}height", None)
         weight = kwargs.pop(f"{XML_NS}weight", None)
 
-        print(f"Parsing tag {tag}")
-
-        constructor = get_widget_constructor(tag)
+        constructor = self.get_widget_constructor(tag)
         if constructor is None:
             return urwid.Filler(urwid.Text(f"Unknown tag: {tag}"))
         elif len(element.getchildren()) > 0:
-            print(f"Calling constructor for {tag}")
             widget = constructor(
                 element,
                 [self.parse_element(child, props) for child in wrapper],
@@ -216,9 +186,6 @@ class Layout:
         else:
             widget = constructor(element, **kwargs)
 
-        print(f"Got widget {widget}")
-
-        # TODO: parse values like height:
         if height is not None:
             return (height, urwid.AttrMap(widget, normal_hash, focus_hash))
         elif weight is not None:
@@ -229,6 +196,28 @@ class Layout:
             )
 
         return urwid.AttrMap(widget, normal_hash, focus_hash)
+
+    def get_widget_constructor(self, tag):
+        if tag in WIDGET_MAP:
+            return WIDGET_MAP[tag]
+        cls = find_urwid_class(tag)
+        if cls is None:
+            return None
+        if issubclass(
+            cls,
+            urwid.WidgetContainerMixin,
+        ):
+            return lambda el, children, **kw: cls(children, **kw)
+        elif issubclass(
+            cls,
+            urwid.WidgetDecoration,
+        ):
+            return lambda el, children, **kw: cls(children[0], **kw)
+        elif issubclass(cls, urwid.Widget):
+            return lambda el, **kw: create_text_widget(cls, el, **kw)
+        else:
+            # TODO: parse custom widgets or just return None if none found
+            return None
 
 
 # TODO: allow pregregistered variables, e.g. widgets, palettes, functions, etc
