@@ -53,5 +53,5 @@
             <text markup="Text 13" align="center" />
         </listbox>
     </scrollbar>
-    <unknown />
+    <customwidget />
 </pile>

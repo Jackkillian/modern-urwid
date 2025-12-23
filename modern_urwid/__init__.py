@@ -64,7 +64,6 @@ DEFAULT_PROPS = {
     "color-adv": "",
     "background-adv": "",
 }
-WIDGET_MAP = {}
 
 
 def find_urwid_class(tag: str):
@@ -85,13 +84,13 @@ def create_text_widget(cls, el, **kw):
 
 
 class Layout:
-    def __init__(self, xml_path, css_path) -> None:
-        xml = open(xml_path).read()
-        css = open(css_path).read()
-
+    def __init__(self, xml_path, css_path, custom_widgets=[]) -> None:
+        self.custom_widgets = custom_widgets
         self.styles = {}
         self.matcher = cssselect2.Matcher()
 
+        xml = open(xml_path).read()
+        css = open(css_path).read()
         rules: list[Node] = tinycss2.parse_stylesheet(
             css,
             skip_comments=True,
@@ -198,8 +197,10 @@ class Layout:
         return urwid.AttrMap(widget, normal_hash, focus_hash)
 
     def get_widget_constructor(self, tag):
-        if tag in WIDGET_MAP:
-            return WIDGET_MAP[tag]
+        cls_lower = tag.lower()
+        for cls in self.custom_widgets:
+            if cls_lower == cls.__name__.lower():
+                return lambda el, **kw: cls(**kw)
         cls = find_urwid_class(tag)
         if cls is None:
             return None
@@ -216,14 +217,21 @@ class Layout:
         elif issubclass(cls, urwid.Widget):
             return lambda el, **kw: create_text_widget(cls, el, **kw)
         else:
-            # TODO: parse custom widgets or just return None if none found
             return None
 
 
 # TODO: allow pregregistered variables, e.g. widgets, palettes, functions, etc
 
 if __name__ == "__main__":
-    layout = Layout("test/layout.xml", "test/styles.css")
+
+    class CustomWidget(urwid.WidgetWrap):
+        def __init__(self):
+            super().__init__(urwid.Filler(urwid.Text("Custom Widget")))
+
+    layout = Layout("test/layout.xml", "test/styles.css", [CustomWidget])
     pprint(layout.palettes)
-    mainloop = urwid.MainLoop(layout.root, palette=layout.palettes)
+    mainloop = urwid.MainLoop(
+        layout.root,
+        palette=layout.palettes,
+    )
     mainloop.run()
