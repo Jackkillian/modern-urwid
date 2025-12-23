@@ -1,12 +1,56 @@
-<pile>
-    <filler height="1"><text class="custom">Hello, world</text></filler>
+<pile xmlns:mu="https://www.jackkillian.com/mu/xml" id="root">
+    <linebox mu:height="4">
+        <boxadapter height="2"><solidfill>x</solidfill></boxadapter>
+    </linebox>
+    <filler mu:height="1"><text class="custom">Hello, world</text></filler>
+    <filler mu:height="1"><edit>Edit: </edit></filler>
+    <filler mu:height="1"><button>Quit</button></filler>
+    <solidfill mu:height="3">.</solidfill>
+    <filler mu:height="2"><divider /></filler>
+    <filler mu:height="1"><progressbar
+            normal=""
+            complete=""
+            current="57"
+        /></filler>
     <filler valign="top" class="dark"><text
         >This should look different</text></filler>
-    <filler valign="top"><text
+    <padding mu:height="2" left="5" right="2"><filler><text
+                id="padded"
+            >Left should be 5; right should be 2</text></filler></padding>
+    <filler mu:height="3">
+        <gridflow cell_width="8" h_sep="20" v_sep="1" align="center">
+            <text class="flow" markup="Text 1" align="center" />
+            <text class="flow" markup="Text 2" align="center" />
+            <text class="flow" markup="Text 3" align="center" />
+            <text class="flow" markup="Text 4" align="center" />
+            <text class="flow" markup="Text 5" align="center" />
+            <text class="flow" markup="Text 6" align="center" />
+            <text class="flow" markup="Text 7" align="center" />
+            <text class="flow" markup="Text 8" align="center" />
+            <text class="flow" markup="Text 9" align="center" />
+        </gridflow>
+    </filler>
+    <filler valign="middle"><text
         >This should inherit the pile style</text></filler>
-    <filler><button>Quit</button></filler>
-    <columns height="1">
-        <filler weight="75"><text class="col1">Col 1</text></filler>
-        <filler weight="25"><text class="col2">Col 2</text></filler>
+    <columns mu:height="1">
+        <filler mu:weight="75"><text class="col1">Col 1</text></filler>
+        <filler mu:weight="25"><text class="col2">Col 2</text></filler>
     </columns>
+    <scrollbar>
+        <listbox>
+            <text markup="Text 1" align="center" />
+            <text markup="Text 2" align="center" />
+            <text markup="Text 3" align="center" />
+            <text markup="Text 4" align="center" />
+            <text markup="Text 5" align="center" />
+            <text markup="Text 6" align="center" />
+            <text markup="Text 7" align="center" />
+            <text markup="Text 8" align="center" />
+            <text markup="Text 9" align="center" />
+            <text markup="Text 10" align="center" />
+            <text markup="Text 11" align="center" />
+            <text markup="Text 12" align="center" />
+            <text markup="Text 13" align="center" />
+        </listbox>
+    </scrollbar>
 </pile>

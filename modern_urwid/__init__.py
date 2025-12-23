@@ -1,3 +1,4 @@
+import inspect
 from pprint import pprint
 
 import cssselect2
@@ -55,6 +56,7 @@ def get_props(content):
     }
 
 
+XML_NS = "{https://www.jackkillian.com/mu/xml}"
 DEFAULT_PROPS = {
     "color": "",
     "background": "",
@@ -62,15 +64,51 @@ DEFAULT_PROPS = {
     "color-adv": "",
     "background-adv": "",
 }
-WIDGET_MAP = {
-    "text": lambda el, **kw: urwid.Text(el.text.strip() if el.text else "", **kw),
-    "button": lambda el, **kw: urwid.Button(el.text.strip() if el.text else "", **kw),
-    "pile": lambda el, children, **kw: urwid.Pile(children, **kw),
-    "columns": lambda el, children, **kw: urwid.Columns(children, **kw),
-    "filler": lambda el, children, **kw: urwid.Filler(
-        children[0] if children else urwid.Divider(), **kw
-    ),
-}
+WIDGET_MAP = {}
+
+
+def find_urwid_class(tag: str):
+    tag = tag.lower()
+    for name, cls in inspect.getmembers(urwid, inspect.isclass):
+        if name.lower() == tag:
+            return cls
+    return None
+
+
+def create_text_widget(cls, el, **kw):
+    if el.text:
+        return cls(
+            el.text, **kw
+        )  # can't do .strip because it'll  remove the space if doing something like 'Name: '
+    else:
+        return cls(**kw)
+
+
+def get_widget_constructor(tag):
+    if tag in WIDGET_MAP:
+        return WIDGET_MAP[tag]
+        if isinstance(cls, (urwid.WidgetContainerMixin, urwid.WidgetDecoration)):
+            return lambda el, children, **kw: WIDGET_MAP[tag](children, **kw)
+        else:
+            return lambda el, **kw: WIDGET_MAP[tag](
+                el.text.strip() if el.text else "", **kw
+            )
+    cls = find_urwid_class(tag)
+    if issubclass(
+        cls,
+        urwid.WidgetContainerMixin,
+    ):
+        return lambda el, children, **kw: cls(children, **kw)
+    elif issubclass(
+        cls,
+        urwid.WidgetDecoration,
+    ):
+        return lambda el, children, **kw: cls(children[0], **kw)
+    elif issubclass(cls, urwid.Widget):
+        return lambda el, **kw: create_text_widget(cls, el, **kw)
+    else:
+        # TODO: parse custom widgets or just return None if none found
+        return None
 
 
 class Layout:
@@ -94,7 +132,6 @@ class Layout:
         )
 
         self.palettes = []
-        # now register the palettes
         for hash, style in self.styles.items():
             self.palettes.append((hash, *style.values()))
 
@@ -126,7 +163,7 @@ class Layout:
 
         pseudos = {}
         if matches:
-            # matches.sort()
+            matches.sort()
             for match in matches:
                 specificity, order, pseudo, payload = match
                 sel_str, data = payload
@@ -153,34 +190,48 @@ class Layout:
         element = wrapper.etree_element
         tag = element.tag
         kwargs = {**element.attrib}
+
+        for k, v in kwargs.items():
+            if isinstance(v, str) and v.isdigit():
+                kwargs[k] = int(v)
+
+        # TODO: mu:child_class applies only to an element's children
         kwargs.pop("class", "")
         kwargs.pop("id", "")
-        height = kwargs.pop("height", None)
-        weight = kwargs.pop("weight", None)
+        height = kwargs.pop(f"{XML_NS}height", None)
+        weight = kwargs.pop(f"{XML_NS}weight", None)
 
-        if len(element.getchildren()) > 0:
-            widget = WIDGET_MAP[tag](
+        print(f"Parsing tag {tag}")
+
+        constructor = get_widget_constructor(tag)
+        if constructor is None:
+            return urwid.Filler(urwid.Text(f"Unknown tag: {tag}"))
+        elif len(element.getchildren()) > 0:
+            print(f"Calling constructor for {tag}")
+            widget = constructor(
                 element,
                 [self.parse_element(child, props) for child in wrapper],
                 **kwargs,
             )
-        elif tag in WIDGET_MAP:
-            widget = WIDGET_MAP[tag](element, **kwargs)
         else:
-            widget = urwid.Text(f"Unknown tag: {tag}")
+            widget = constructor(element, **kwargs)
+
+        print(f"Got widget {widget}")
 
         # TODO: parse values like height:
-        if isinstance(height, str) and height.isdigit():
-            return (int(height), urwid.AttrMap(widget, normal_hash, focus_hash))
-        elif isinstance(weight, str) and weight.isdigit():
+        if height is not None:
+            return (height, urwid.AttrMap(widget, normal_hash, focus_hash))
+        elif weight is not None:
             return (
                 "weight",
-                int(weight),
+                weight,
                 urwid.AttrMap(widget, normal_hash, focus_hash),
             )
 
         return urwid.AttrMap(widget, normal_hash, focus_hash)
 
+
+# TODO: allow pregregistered variables, e.g. widgets, palettes, functions, etc
 
 if __name__ == "__main__":
     layout = Layout("test/layout.xml", "test/styles.css")

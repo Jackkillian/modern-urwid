@@ -1,6 +1,15 @@
-pile {
+#root {
     color: black;
-    background: dark cyan;
+    background: dark gray;
+}
+
+edit {
+    color: black;
+}
+
+linebox {
+    color: white;
+    background: black;
 }
 
 /*text {
@@ -22,15 +31,25 @@ pile {
     background: black;
 }
 
+#padded {
+    color: white;
+    background: black;
+}
+
+.flow {
+    color: white;
+    background: dark blue;
+}
+
 button {
-    color: light blue;
+    color: yellow;
 }
 
 button:focus {
     color: light red;
 }
 
-edit,
+scrollbar,
 text:focus:hover,
 #texthover {
     color: light blue;
