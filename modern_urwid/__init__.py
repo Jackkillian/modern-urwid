@@ -89,7 +89,8 @@ class Layout:
         self.parse_rules(rules)
 
         self.root = self.parse_element(
-            cssselect2.ElementWrapper.from_html_root(etree.fromstring(xml))
+            cssselect2.ElementWrapper.from_html_root(etree.fromstring(xml)),
+            DEFAULT_PROPS,
         )
 
         self.palettes = []
@@ -119,9 +120,8 @@ class Layout:
                         self.pseudo_map[sel_str] = {}
                     self.pseudo_map[sel_str][pseudo] = props
 
-    # TODO: style inheritance...
-    def parse_element(self, wrapper: cssselect2.ElementWrapper):
-        props = DEFAULT_PROPS.copy()
+    def parse_element(self, wrapper: cssselect2.ElementWrapper, root_palette: dict):
+        props = root_palette.copy()
         matches = self.matcher.match(wrapper)
 
         pseudos = {}
@@ -160,7 +160,9 @@ class Layout:
 
         if len(element.getchildren()) > 0:
             widget = WIDGET_MAP[tag](
-                element, [self.parse_element(child) for child in wrapper], **kwargs
+                element,
+                [self.parse_element(child, props) for child in wrapper],
+                **kwargs,
             )
         elif tag in WIDGET_MAP:
             widget = WIDGET_MAP[tag](element, **kwargs)

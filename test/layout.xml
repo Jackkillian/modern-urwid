@@ -1,8 +1,9 @@
 <pile>
     <filler height="1"><text class="custom">Hello, world</text></filler>
-    <filler valign="top"><text
-            class="dark"
+    <filler valign="top" class="dark"><text
         >This should look different</text></filler>
+    <filler valign="top"><text
+        >This should inherit the pile style</text></filler>
     <filler><button>Quit</button></filler>
     <columns height="1">
         <filler weight="75"><text class="col1">Col 1</text></filler>

@@ -1,7 +1,12 @@
-text {
+pile {
+    color: black;
+    background: dark cyan;
+}
+
+/*text {
     color: white;
     background: dark red;
-}
+}*/
 
 .custom {
     background: dark gray;
