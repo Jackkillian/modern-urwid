@@ -84,7 +84,9 @@ def create_text_widget(cls, el, **kw):
 
 
 class Layout:
-    def __init__(self, xml_path, css_path, custom_widgets=[]) -> None:
+    def __init__(
+        self, xml_path, css_path, custom_widgets=[], custom_palettes=[]
+    ) -> None:
         self.custom_widgets = custom_widgets
         self.styles = {}
         self.matcher = cssselect2.Matcher()
@@ -103,7 +105,7 @@ class Layout:
             DEFAULT_PROPS,
         )
 
-        self.palettes = []
+        self.palettes = custom_palettes
         for hash, style in self.styles.items():
             self.palettes.append((hash, *style.values()))
 
@@ -228,7 +230,9 @@ if __name__ == "__main__":
         def __init__(self):
             super().__init__(urwid.Filler(urwid.Text("Custom Widget")))
 
-    layout = Layout("test/layout.xml", "test/styles.css", [CustomWidget])
+    palettes = [("pb_empty", "white", "black"), ("pb_full", "white", "dark red")]
+
+    layout = Layout("test/layout.xml", "test/styles.css", [CustomWidget], palettes)
     pprint(layout.palettes)
     mainloop = urwid.MainLoop(
         layout.root,

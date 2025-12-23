@@ -8,8 +8,8 @@
     <solidfill mu:height="3">.</solidfill>
     <filler mu:height="2"><divider /></filler>
     <filler mu:height="1"><progressbar
-            normal=""
-            complete=""
+            normal="pb_empty"
+            complete="pb_full"
             current="57"
         /></filler>
     <filler valign="top" class="dark"><text
