@@ -1,5 +1,0 @@
-urwid
-tinycss2
-cssselect2
-lxml
-dict_hash

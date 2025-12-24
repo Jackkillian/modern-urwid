@@ -2,71 +2,18 @@ from __future__ import annotations
 
 import inspect
 from pathlib import Path
-from pprint import pprint
 
 import cssselect2
 import tinycss2
 import urwid
 from dict_hash import md5
 from lxml import etree
-from tinycss2.ast import Node, WhitespaceToken
+from tinycss2.ast import Node
 
-XML_NS = "{https://github.com/Jackkillian/modern-urwid}"
-RESOURCE_CHAR = "@"
-DEFAULT_PROPS = {
-    "color": "",
-    "background": "",
-    "monochrome": "",
-    "color-adv": "",
-    "background-adv": "",
-}
-
-
-def pop_pseudos_from_tokens(tokens):
-    result = []
-    pseudos = []
-    i = 0
-    while i < len(tokens):
-        token = tokens[i]
-        if token.type == "literal" and token.value == ":":
-            if len(tokens) > i + 1 and tokens[i + 1].type == "ident":
-                pseudos.append(tokens[i + 1].value)
-                i += 2
-                continue
-        elif token.type == "function":
-            pseudos.append(token.name)
-        else:
-            result.append(token)
-        i += 1
-    return result, pseudos
-
-
-def split_tokens_by_comma(tokens):
-    selectors = []
-    current = []
-    for token in tokens:
-        if isinstance(token, WhitespaceToken):
-            continue
-        if token.type == "literal" and token.value == ",":
-            selectors.append(current)
-            current = []
-        else:
-            current.append(token)
-    if current:
-        selectors.append(current)
-    return selectors
-
-
-def get_props(content):
-    decls = tinycss2.parse_declaration_list(
-        content, skip_comments=True, skip_whitespace=True
-    )
-    return {
-        decl.name: "".join(
-            [token.value for token in decl.value if hasattr(token, "value")]
-        ).strip()
-        for decl in decls
-    }
+from .constants import DEFAULT_PROPS, RESOURCE_CHAR, XML_NS
+from .exceptions import UnknownResource
+from .parser import get_props, pop_pseudos_from_tokens, split_tokens_by_comma
+from .wrapper import FilteredWrapper
 
 
 def find_urwid_class(tag: str):
@@ -84,25 +31,6 @@ def create_text_widget(cls, el, **kw):
         )  # can't do .strip because it'll  remove the space if doing something like 'Name: '
     else:
         return cls(**kw)
-
-
-class UnknownResource(Exception):
-    pass
-
-
-class CustomWrapper(cssselect2.ElementWrapper):
-    def iter_children(self):
-        child = None
-        for i, etree_child in enumerate(self.etree_children):
-            if not etree_child.tag.startswith(XML_NS):
-                child = type(self)(
-                    etree_child,
-                    parent=self,
-                    index=i,
-                    previous=child,
-                    in_html_document=self.in_html_document,
-                )
-                yield child
 
 
 class LayoutResources:
@@ -145,13 +73,20 @@ class Layout:
         )
         self.parse_rules(rules)
 
-        self.root = self.parse_element(
-            CustomWrapper.from_html_root(etree.fromstring(xml)),
+        root = self.parse_element(
+            FilteredWrapper.from_html_root(etree.fromstring(xml)),
             DEFAULT_PROPS,
         )
+        if not isinstance(root, urwid.Widget):
+            raise ValueError(f"Got {root} instead of Widget for root")
+        else:
+            self.root = root
 
         for hash, style in self.styles.items():
             self.palettes.append((hash, *style.values()))
+
+    def get_root(self):
+        return self.root
 
     def parse_rules(self, rules):
         self.pseudo_map = {}
@@ -198,7 +133,10 @@ class Layout:
             raise UnknownResource(f"Could not custom resource '@{attr}'")
 
     def parse_element(
-        self, wrapper: CustomWrapper, root_palette: dict, child_class: str | None = None
+        self,
+        wrapper: FilteredWrapper,
+        root_palette: dict,
+        child_class: str | None = None,
     ):
         if child_class is not None:
             wrapper.classes |= {child_class}
@@ -215,8 +153,6 @@ class Layout:
                 props = {**props, **data}
                 if sel_str in self.pseudo_map:
                     pseudos = self.pseudo_map[sel_str]
-
-        print(f"Props for {wrapper.etree_element.tag}: {props}")
 
         normal_hash = md5(props)
         if normal_hash not in self.styles:
@@ -312,37 +248,3 @@ class Layout:
 
     def get_widget_by_id(self, id) -> urwid.Widget | None:
         return self.widget_map.get(id)
-
-
-if __name__ == "__main__":
-
-    class CustomWidget(urwid.WidgetWrap):
-        def __init__(self):
-            super().__init__(urwid.Filler(urwid.Text("Custom Widget")))
-
-    class CustomResources(LayoutResources):
-        def __init__(self, layout):
-            super().__init__(
-                layout,
-                [CustomWidget],
-                [("pb_empty", "white", "black"), ("pb_full", "white", "dark red")],
-            )
-
-        def quit_callback(self, w):
-            raise urwid.ExitMainLoop()
-
-        def on_edit_change(self, w: urwid.Edit, full_text):
-            w.set_caption(f"Edit ({full_text}): ")
-
-        def on_edit_postchange(self, w, text):
-            widget = self.layout.get_widget_by_id("header_text")
-            if isinstance(widget, urwid.Text):
-                widget.set_text(text)
-
-    layout = Layout("test/layout.xml", "test/styles.css", CustomResources)
-    pprint(layout.palettes)
-    mainloop = urwid.MainLoop(
-        layout.root,
-        palette=layout.palettes,
-    )
-    mainloop.run()

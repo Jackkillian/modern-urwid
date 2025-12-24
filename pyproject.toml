@@ -1,0 +1,67 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "modern-urwid"
+dynamic = ["version"]
+description = 'Various QOL utilities for urwid'
+readme = "README.md"
+requires-python = ">=3.8"
+license = "MIT"
+keywords = []
+authors = [
+  { name = "Jackkillian", email = "jackkillian@tuta.com" },
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+]
+dependencies = [
+  "urwid",
+  "tinycss2",
+  "cssselect2",
+  "lxml",
+  "dict_hash",
+]
+
+[project.urls]
+Documentation = "https://github.com/Jackkillian/modern-urwid#readme"
+Issues = "https://github.com/Jackkillian/modern-urwid/issues"
+Source = "https://github.com/Jackkillian/modern-urwid"
+
+[tool.hatch.version]
+path = "src/modern_urwid/__about__.py"
+
+[tool.hatch.envs.types]
+extra-dependencies = [
+  "mypy>=1.0.0",
+]
+[tool.hatch.envs.types.scripts]
+check = "mypy --install-types --non-interactive {args:src/modern_urwid tests}"
+
+[tool.coverage.run]
+source_pkgs = ["modern_urwid", "tests"]
+branch = true
+parallel = true
+omit = [
+  "src/modern_urwid/__about__.py",
+]
+
+[tool.coverage.paths]
+modern_urwid = ["src/modern_urwid", "*/modern-urwid/src/modern_urwid"]
+tests = ["tests", "*/modern-urwid/tests"]
+
+[tool.coverage.report]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]
