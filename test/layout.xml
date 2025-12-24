@@ -1,10 +1,15 @@
-<pile xmlns:mu="https://www.jackkillian.com/mu/xml" id="root">
+<pile xmlns:mu="https://github.com/Jackkillian/modern-urwid" id="root">
     <linebox mu:height="4">
         <boxadapter height="2"><solidfill>x</solidfill></boxadapter>
     </linebox>
     <filler mu:height="1"><text class="custom">Hello, world</text></filler>
-    <filler mu:height="1"><edit>Edit: </edit></filler>
-    <filler mu:height="1"><button>Quit</button></filler>
+    <filler mu:height="1"><edit caption="Edit: ">
+        <mu:signal name="change" callback="@on_edit_change" />
+        <mu:signal name="postchange" callback="@on_edit_postchange" />
+    </edit></filler>
+    <filler mu:height="1"><button
+            on_press="@quit_callback"
+        >Quit</button></filler>
     <solidfill mu:height="3">.</solidfill>
     <filler mu:height="2"><divider /></filler>
     <filler mu:height="1"><progressbar

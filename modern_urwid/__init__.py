@@ -1,4 +1,5 @@
 import inspect
+from pathlib import Path
 from pprint import pprint
 
 import cssselect2
@@ -7,6 +8,16 @@ import urwid
 from dict_hash import md5
 from lxml import etree
 from tinycss2.ast import Node, WhitespaceToken
+
+XML_NS = "{https://github.com/Jackkillian/modern-urwid}"
+RESOURCE_CHAR = "@"
+DEFAULT_PROPS = {
+    "color": "",
+    "background": "",
+    "monochrome": "",
+    "color-adv": "",
+    "background-adv": "",
+}
 
 
 def pop_pseudos_from_tokens(tokens):
@@ -56,16 +67,6 @@ def get_props(content):
     }
 
 
-XML_NS = "{https://www.jackkillian.com/mu/xml}"
-DEFAULT_PROPS = {
-    "color": "",
-    "background": "",
-    "monochrome": "",
-    "color-adv": "",
-    "background-adv": "",
-}
-
-
 def find_urwid_class(tag: str):
     tag = tag.lower()
     for name, cls in inspect.getmembers(urwid, inspect.isclass):
@@ -75,7 +76,7 @@ def find_urwid_class(tag: str):
 
 
 def create_text_widget(cls, el, **kw):
-    if el.text:
+    if el.text and el.text.strip():
         return cls(
             el.text, **kw
         )  # can't do .strip because it'll  remove the space if doing something like 'Name: '
@@ -83,11 +84,54 @@ def create_text_widget(cls, el, **kw):
         return cls(**kw)
 
 
+class UnknownResource(Exception):
+    pass
+
+
+class CustomWrapper(cssselect2.ElementWrapper):
+    def iter_children(self):
+        child = None
+        for i, etree_child in enumerate(self.etree_children):
+            if not etree_child.tag.startswith(XML_NS):
+                child = type(self)(
+                    etree_child,
+                    parent=self,
+                    index=i,
+                    previous=child,
+                    in_html_document=self.in_html_document,
+                )
+                yield child
+
+
+class LayoutResources:
+    """
+    A base class for extending a layout's functionality
+    """
+
+    def __init__(self, layout, widgets=[], palettes=[]):
+        self.layout = layout
+        self.widgets = widgets
+        self.palettes = palettes
+
+    def get_widgets(self):
+        return self.widgets
+
+    def get_palettes(self):
+        return self.palettes
+
+
+# TODO: widgetmap by id attribute
+# can be accessed by get_widget_by_id method
 class Layout:
     def __init__(
-        self, xml_path, css_path, custom_widgets=[], custom_palettes=[]
+        self,
+        xml_path: str | Path,
+        css_path: str | Path,
+        resources_cls=LayoutResources,
     ) -> None:
-        self.custom_widgets = custom_widgets
+        self.resources = resources_cls(self)
+        self.custom_widgets = self.resources.get_widgets()
+        self.palettes = self.resources.get_palettes()
         self.styles = {}
         self.matcher = cssselect2.Matcher()
 
@@ -101,11 +145,10 @@ class Layout:
         self.parse_rules(rules)
 
         self.root = self.parse_element(
-            cssselect2.ElementWrapper.from_html_root(etree.fromstring(xml)),
+            CustomWrapper.from_html_root(etree.fromstring(xml)),
             DEFAULT_PROPS,
         )
 
-        self.palettes = custom_palettes
         for hash, style in self.styles.items():
             self.palettes.append((hash, *style.values()))
 
@@ -131,7 +174,29 @@ class Layout:
                         self.pseudo_map[sel_str] = {}
                     self.pseudo_map[sel_str][pseudo] = props
 
-    def parse_element(self, wrapper: cssselect2.ElementWrapper, root_palette: dict):
+    def parse_attrs(self, kwargs: dict):
+        result = {}
+        for k, v in kwargs.items():
+            if isinstance(v, str):
+                if v.isdigit():
+                    result[k] = int(v)
+                elif v.startswith(RESOURCE_CHAR):
+                    result[k] = self.get_resource(v[len(RESOURCE_CHAR) :])
+                elif v == "False":
+                    result[k] = False
+                elif v == "True":
+                    result[k] = True
+                else:
+                    result[k] = v
+        return result
+
+    def get_resource(self, attr):
+        if hasattr(self.resources, attr):
+            return getattr(self.resources, attr)
+        else:
+            raise UnknownResource(f"Could not custom resource '@{attr}'")
+
+    def parse_element(self, wrapper: CustomWrapper, root_palette: dict):
         props = root_palette.copy()
         matches = self.matcher.match(wrapper)
 
@@ -163,22 +228,28 @@ class Layout:
         #
         element = wrapper.etree_element
         tag = element.tag
-        kwargs = {**element.attrib}
+        kwargs = self.parse_attrs(element.attrib)
 
-        for k, v in kwargs.items():
-            if isinstance(v, str) and v.isdigit():
-                kwargs[k] = int(v)
-
-        # TODO: mu:child_class applies only to an element's children
-        kwargs.pop("class", "")
-        kwargs.pop("id", "")
+        # TODO: make mu:child_class applies only to an element's children
+        clazz = kwargs.pop("class", None)
+        id = kwargs.pop("id", None)
         height = kwargs.pop(f"{XML_NS}height", None)
         weight = kwargs.pop(f"{XML_NS}weight", None)
+        child_class = kwargs.pop(f"{XML_NS}child_class", None)
+
+        signals = {}
+        children = []
+        for child in element.getchildren():
+            if child.tag == f"{XML_NS}signal":
+                signal_name = child.get("name")
+                signals[signal_name] = self.parse_attrs(child.attrib)
+            else:
+                children.append(child)
 
         constructor = self.get_widget_constructor(tag)
         if constructor is None:
             return urwid.Filler(urwid.Text(f"Unknown tag: {tag}"))
-        elif len(element.getchildren()) > 0:
+        elif children:
             widget = constructor(
                 element,
                 [self.parse_element(child, props) for child in wrapper],
@@ -186,6 +257,11 @@ class Layout:
             )
         else:
             widget = constructor(element, **kwargs)
+
+        for name, attrs in signals.items():
+            urwid.connect_signal(
+                widget, name, attrs.get("callback"), attrs.get("user_arg")
+            )
 
         if height is not None:
             return (height, urwid.AttrMap(widget, normal_hash, focus_hash))
@@ -222,17 +298,30 @@ class Layout:
             return None
 
 
-# TODO: allow pregregistered variables, e.g. widgets, palettes, functions, etc
-
 if __name__ == "__main__":
 
     class CustomWidget(urwid.WidgetWrap):
         def __init__(self):
             super().__init__(urwid.Filler(urwid.Text("Custom Widget")))
 
-    palettes = [("pb_empty", "white", "black"), ("pb_full", "white", "dark red")]
+    class CustomResources(LayoutResources):
+        def __init__(self, layout):
+            super().__init__(
+                layout,
+                [CustomWidget],
+                [("pb_empty", "white", "black"), ("pb_full", "white", "dark red")],
+            )
 
-    layout = Layout("test/layout.xml", "test/styles.css", [CustomWidget], palettes)
+        def quit_callback(self, w):
+            raise urwid.ExitMainLoop()
+
+        def on_edit_change(self, w: urwid.Edit, full_text):
+            w.set_caption(f"Edit ({full_text}): ")
+
+        def on_edit_postchange(self, w, *args):
+            pass
+
+    layout = Layout("test/layout.xml", "test/styles.css", CustomResources)
     pprint(layout.palettes)
     mainloop = urwid.MainLoop(
         layout.root,
