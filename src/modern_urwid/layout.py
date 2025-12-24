@@ -84,20 +84,25 @@ class Layout:
         return self.root
 
     def parse_attrs(self, kwargs: dict):
-        result = {}
+        mu = {}
+        normal = {}
         for k, v in kwargs.items():
+            target = normal
+            if k.startswith(XML_NS):
+                k = k[len(XML_NS) :]
+                target = mu
             if isinstance(v, str):
                 if v.isdigit():
-                    result[k] = int(v)
+                    target[k] = int(v)
                 elif v.startswith(RESOURCE_CHAR):
-                    result[k] = self.get_resource(v[len(RESOURCE_CHAR) :])
+                    target[k] = self.get_resource(v[len(RESOURCE_CHAR) :])
                 elif v == "False":
-                    result[k] = False
+                    target[k] = False
                 elif v == "True":
-                    result[k] = True
+                    target[k] = True
                 else:
-                    result[k] = v
-        return result
+                    target[k] = v
+        return mu, normal
 
     def get_resource(self, attr):
         if hasattr(self.resources, attr):
@@ -114,6 +119,18 @@ class Layout:
         if child_class is not None:
             wrapper.classes |= {child_class}
 
+        element = wrapper.etree_element
+        tag = element.tag
+
+        # Parse Attributes
+        mu_kwargs, kwargs = self.parse_attrs(element.attrib)
+        clazz = kwargs.pop("class", None)
+        id = kwargs.pop("id", None)
+        child_class = mu_kwargs.get("child_class")
+        height = mu_kwargs.get("height")
+        weight = mu_kwargs.get("weight")
+
+        # Apply Styling
         style, pseudos = self.css_parser.get_styles(root_palette, wrapper)
 
         normal_hash = md5(style)
@@ -125,22 +142,6 @@ class Layout:
             focus_hash = md5(pseudos["focus"])
             if focus_hash not in self.styles:
                 self.styles[focus_hash] = {**style.copy(), **pseudos["focus"]}
-
-        # TODO: need to parse any more pseudos?
-        # for name, style in pseudos.items():
-        #     hash = md5(style)
-        #     if hash not in self.styles:
-        #         self.styles[hash] = style
-        #
-        element = wrapper.etree_element
-        tag = element.tag
-        kwargs = self.parse_attrs(element.attrib)
-
-        clazz = kwargs.pop("class", None)
-        id = kwargs.pop("id", None)
-        child_class = kwargs.pop(f"{XML_NS}child_class", None)
-        height = kwargs.pop(f"{XML_NS}height", None)
-        weight = kwargs.pop(f"{XML_NS}weight", None)
 
         signals = {}
         children = []
@@ -171,7 +172,7 @@ class Layout:
 
         for name, attrs in signals.items():
             urwid.connect_signal(
-                widget, name, attrs.get("callback"), attrs.get("user_arg")
+                widget, name, attrs[1].get("callback"), attrs[1].get("user_arg")
             )
 
         if height is not None:
