@@ -67,5 +67,6 @@
             <text markup="Text 13" align="center" />
         </listbox>
     </scrollbar>
+    <mu:layout path="layout2.xml" />
     <customwidget />
 </pile>

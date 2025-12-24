@@ -10,9 +10,9 @@ from dict_hash import md5
 from lxml import etree
 from tinycss2.ast import Node
 
-from .constants import DEFAULT_PROPS, RESOURCE_CHAR, XML_NS
+from .constants import DEFAULT_STYLE, RESOURCE_CHAR, XML_NS
 from .exceptions import UnknownResource
-from .parser import get_props, pop_pseudos_from_tokens, split_tokens_by_comma
+from .parser import CSSParser
 from .wrapper import FilteredWrapper
 
 
@@ -62,20 +62,14 @@ class Layout:
         self.palettes = self.resources.get_palettes()
         self.widget_map = {}
         self.styles = {}
-        self.matcher = cssselect2.Matcher()
 
+        self.xml_dir = Path(xml_path).parent
         xml = open(xml_path).read()
-        css = open(css_path).read()
-        rules: list[Node] = tinycss2.parse_stylesheet(
-            css,
-            skip_comments=True,
-            skip_whitespace=True,
-        )
-        self.parse_rules(rules)
+        self.css_parser = CSSParser(Path(css_path))
 
         root = self.parse_element(
             FilteredWrapper.from_html_root(etree.fromstring(xml)),
-            DEFAULT_PROPS,
+            DEFAULT_STYLE,
         )
         if not isinstance(root, urwid.Widget):
             raise ValueError(f"Got {root} instead of Widget for root")
@@ -87,28 +81,6 @@ class Layout:
 
     def get_root(self):
         return self.root
-
-    def parse_rules(self, rules):
-        self.pseudo_map = {}
-
-        for rule in rules:
-            element_selectors: list[list[Node]] = split_tokens_by_comma(rule.prelude)
-            props = get_props(rule.content)
-            for selectors in element_selectors:
-                compiled = cssselect2.compile_selector_list(selectors)
-
-                selectors, pseudos = pop_pseudos_from_tokens(
-                    selectors
-                )  # NOTE: overwrites selectors
-                sel_str = tinycss2.serialize(selectors)
-
-                for item in compiled:
-                    self.matcher.add_selector(item, (sel_str, props))
-
-                for pseudo in pseudos:
-                    if sel_str not in self.pseudo_map:
-                        self.pseudo_map[sel_str] = {}
-                    self.pseudo_map[sel_str][pseudo] = props
 
     def parse_attrs(self, kwargs: dict):
         result = {}
@@ -141,34 +113,23 @@ class Layout:
         if child_class is not None:
             wrapper.classes |= {child_class}
 
-        props = root_palette.copy()
-        matches = self.matcher.match(wrapper)
+        style, pseudos = self.css_parser.get_styles(root_palette, wrapper)
 
-        pseudos = {}
-        if matches:
-            matches.sort()
-            for match in matches:
-                specificity, order, pseudo, payload = match
-                sel_str, data = payload
-                props = {**props, **data}
-                if sel_str in self.pseudo_map:
-                    pseudos = self.pseudo_map[sel_str]
-
-        normal_hash = md5(props)
+        normal_hash = md5(style)
         if normal_hash not in self.styles:
-            self.styles[normal_hash] = props
+            self.styles[normal_hash] = style
 
         focus_hash = None
         if "focus" in pseudos:
             focus_hash = md5(pseudos["focus"])
             if focus_hash not in self.styles:
-                self.styles[focus_hash] = {**props.copy(), **pseudos["focus"]}
+                self.styles[focus_hash] = {**style.copy(), **pseudos["focus"]}
 
         # TODO: need to parse any more pseudos?
-        # for name, props in pseudos.items():
-        #     hash = md5(props)
+        # for name, style in pseudos.items():
+        #     hash = md5(style)
         #     if hash not in self.styles:
-        #         self.styles[hash] = props
+        #         self.styles[hash] = style
         #
         element = wrapper.etree_element
         tag = element.tag
@@ -195,7 +156,7 @@ class Layout:
         elif children:
             widget = constructor(
                 element,
-                [self.parse_element(child, props, child_class) for child in wrapper],
+                [self.parse_element(child, style, child_class) for child in wrapper],
                 **kwargs,
             )
         else:

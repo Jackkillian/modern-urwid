@@ -1,6 +1,6 @@
 XML_NS = "{https://github.com/Jackkillian/modern-urwid}"
 RESOURCE_CHAR = "@"
-DEFAULT_PROPS = {
+DEFAULT_STYLE = {
     "color": "",
     "background": "",
     "monochrome": "",
