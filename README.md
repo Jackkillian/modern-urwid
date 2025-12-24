@@ -4,7 +4,8 @@ A small library providing various QOL urwid utilities.
 Current features:
 - Read XML and CSS files and parse them into urwid Widgets using the `Layout` and `LayoutResources` classes
 
-Example:
+### Example
+Python:
 ```python
 import urwid
 import modern_urwid
@@ -36,4 +37,58 @@ urwid.MainLoop(
     layout.root,
     palette=layout.palettes,
 ).run()
+```
+  
+XML:
+```xml
+<pile xmlns:mu="https://github.com/Jackkillian/modern-urwid" id="root">
+    <filler mu:height="1"><text
+            id="header_text"
+            class="custom"
+        >Hello, world!</text></filler>
+    <filler mu:height="1">
+        <edit caption="Edit: ">
+            <mu:signal name="change" callback="@on_edit_change" />
+            <mu:signal name="postchange" callback="@on_edit_postchange" />
+        </edit>
+    </filler>
+    <filler mu:height="1">
+        <button on_press="@quit_callback">Quit</button>
+    </filler>
+    <filler mu:height="1">
+        <progressbar
+            normal="pb_empty"
+            complete="pb_full"
+            current="57"
+        />
+    </filler>
+    <filler valign="middle">
+        <text>This inherits the root pile style</text>
+    </filler>
+    <customwidget />
+    <columns mu:height="1">
+        <filler mu:weight="75"><text class="col1">Col 1</text></filler>
+        <filler mu:weight="25"><text class="col2">Col 2</text></filler>
+    </columns>
+</pile>
+```
+  
+CSS:
+```css
+#root {
+    color: black;
+    background: dark gray;
+}
+edit { color: white; }
+.custom {
+    color: light green;
+    background: dark gray;
+}
+button { color: yellow; }
+button:focus { color: light red; }
+.col1 { background: dark blue; }
+.col2 {
+    color: black;
+    background: brown;
+}
 ```

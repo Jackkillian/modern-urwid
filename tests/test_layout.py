@@ -16,7 +16,10 @@ def test_layout_loads():
             super().__init__(
                 layout,
                 [CustomWidget],
-                [("pb_empty", "white", "black"), ("pb_full", "white", "dark red")],
+                [
+                    ("pb_empty", "white", "black"),
+                    ("pb_full", "black", "light blue"),
+                ],
             )
 
         def quit_callback(self, w):
