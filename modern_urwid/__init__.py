@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import inspect
 from pathlib import Path
 from pprint import pprint
@@ -108,7 +110,7 @@ class LayoutResources:
     A base class for extending a layout's functionality
     """
 
-    def __init__(self, layout, widgets=[], palettes=[]):
+    def __init__(self, layout: Layout, widgets=[], palettes=[]):
         self.layout = layout
         self.widgets = widgets
         self.palettes = palettes
@@ -120,8 +122,6 @@ class LayoutResources:
         return self.palettes
 
 
-# TODO: widgetmap by id attribute
-# can be accessed by get_widget_by_id method
 class Layout:
     def __init__(
         self,
@@ -132,6 +132,7 @@ class Layout:
         self.resources = resources_cls(self)
         self.custom_widgets = self.resources.get_widgets()
         self.palettes = self.resources.get_palettes()
+        self.widget_map = {}
         self.styles = {}
         self.matcher = cssselect2.Matcher()
 
@@ -264,6 +265,12 @@ class Layout:
         else:
             widget = constructor(element, **kwargs)
 
+        if id is not None:
+            if id in self.widget_map:
+                raise ValueError(f"Cannot duplicate IDs: {id}")
+            else:
+                self.widget_map[id] = widget
+
         for name, attrs in signals.items():
             urwid.connect_signal(
                 widget, name, attrs.get("callback"), attrs.get("user_arg")
@@ -303,6 +310,9 @@ class Layout:
         else:
             return None
 
+    def get_widget_by_id(self, id) -> urwid.Widget | None:
+        return self.widget_map.get(id)
+
 
 if __name__ == "__main__":
 
@@ -324,8 +334,10 @@ if __name__ == "__main__":
         def on_edit_change(self, w: urwid.Edit, full_text):
             w.set_caption(f"Edit ({full_text}): ")
 
-        def on_edit_postchange(self, w, *args):
-            pass
+        def on_edit_postchange(self, w, text):
+            widget = self.layout.get_widget_by_id("header_text")
+            if isinstance(widget, urwid.Text):
+                widget.set_text(text)
 
     layout = Layout("test/layout.xml", "test/styles.css", CustomResources)
     pprint(layout.palettes)
