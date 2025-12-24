@@ -215,15 +215,17 @@ class Layout:
                 if sel_str in self.pseudo_map:
                     pseudos = self.pseudo_map[sel_str]
 
+        print(f"Props for {wrapper.etree_element.tag}: {props}")
+
         normal_hash = md5(props)
         if normal_hash not in self.styles:
             self.styles[normal_hash] = props
 
         focus_hash = None
         if "focus" in pseudos:
-            hash = md5(pseudos["focus"])
-            if hash not in self.styles:
-                self.styles[hash] = {**DEFAULT_PROPS.copy(), **pseudos["focus"]}
+            focus_hash = md5(pseudos["focus"])
+            if focus_hash not in self.styles:
+                self.styles[focus_hash] = {**props.copy(), **pseudos["focus"]}
 
         # TODO: need to parse any more pseudos?
         # for name, props in pseudos.items():

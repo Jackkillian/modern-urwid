@@ -50,7 +50,7 @@ button:focus {
 }
 
 scrollbar,
-text:focus:hover,
+/*text:focus:hover,*/
 #texthover {
     color: light blue;
 }
