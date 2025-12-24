@@ -56,7 +56,7 @@ class CSSParser:
     def __init__(self, path: Path):
         if not path.exists():
             raise FileNotFoundError(f"Could not find stylesheet: {path} does not exist")
-        if not path.is_file():
+        elif not path.is_file():
             raise IsADirectoryError(f"Could not find stylesheet: {path} is a directory")
 
         self.path = path

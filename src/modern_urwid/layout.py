@@ -63,9 +63,10 @@ class Layout:
         self.widget_map = {}
         self.styles = {}
 
+        self.css_parser = CSSParser(Path(css_path))
+
         self.xml_dir = Path(xml_path).parent
         xml = open(xml_path).read()
-        self.css_parser = CSSParser(Path(css_path))
 
         root = self.parse_element(
             FilteredWrapper.from_html_root(etree.fromstring(xml)),

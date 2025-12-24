@@ -1,7 +1,11 @@
 # modern-urwid
 A small library providing various QOL urwid utilities.
-  
-Current features:
+
+## Installation
+Instal with:  
+`pip install modern-urwid`
+
+## Features
 - Read XML and CSS files and parse them into urwid Widgets using the `Layout` and `LayoutResources` classes
 
 ### Example
