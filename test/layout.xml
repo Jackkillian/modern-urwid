@@ -23,16 +23,22 @@
                 id="padded"
             >Left should be 5; right should be 2</text></filler></padding>
     <filler mu:height="3">
-        <gridflow cell_width="8" h_sep="20" v_sep="1" align="center">
-            <text class="flow" markup="Text 1" align="center" />
-            <text class="flow" markup="Text 2" align="center" />
-            <text class="flow" markup="Text 3" align="center" />
-            <text class="flow" markup="Text 4" align="center" />
-            <text class="flow" markup="Text 5" align="center" />
-            <text class="flow" markup="Text 6" align="center" />
-            <text class="flow" markup="Text 7" align="center" />
-            <text class="flow" markup="Text 8" align="center" />
-            <text class="flow" markup="Text 9" align="center" />
+        <gridflow
+            cell_width="8"
+            h_sep="20"
+            v_sep="1"
+            align="center"
+            mu:child_class="flow"
+        >
+            <text markup="Text 1" align="center" />
+            <text markup="Text 2" align="center" />
+            <text markup="Text 3" align="center" />
+            <text markup="Text 4" align="center" />
+            <text markup="Text 5" align="center" />
+            <text markup="Text 6" align="center" />
+            <text markup="Text 7" align="center" />
+            <text markup="Text 8" align="center" />
+            <text markup="Text 9" align="center" />
         </gridflow>
     </filler>
     <filler valign="middle"><text

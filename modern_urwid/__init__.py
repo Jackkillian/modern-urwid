@@ -196,7 +196,12 @@ class Layout:
         else:
             raise UnknownResource(f"Could not custom resource '@{attr}'")
 
-    def parse_element(self, wrapper: CustomWrapper, root_palette: dict):
+    def parse_element(
+        self, wrapper: CustomWrapper, root_palette: dict, child_class: str | None = None
+    ):
+        if child_class is not None:
+            wrapper.classes |= {child_class}
+
         props = root_palette.copy()
         matches = self.matcher.match(wrapper)
 
@@ -230,12 +235,11 @@ class Layout:
         tag = element.tag
         kwargs = self.parse_attrs(element.attrib)
 
-        # TODO: make mu:child_class applies only to an element's children
         clazz = kwargs.pop("class", None)
         id = kwargs.pop("id", None)
+        child_class = kwargs.pop(f"{XML_NS}child_class", None)
         height = kwargs.pop(f"{XML_NS}height", None)
         weight = kwargs.pop(f"{XML_NS}weight", None)
-        child_class = kwargs.pop(f"{XML_NS}child_class", None)
 
         signals = {}
         children = []
@@ -252,7 +256,7 @@ class Layout:
         elif children:
             widget = constructor(
                 element,
-                [self.parse_element(child, props) for child in wrapper],
+                [self.parse_element(child, props, child_class) for child in wrapper],
                 **kwargs,
             )
         else:

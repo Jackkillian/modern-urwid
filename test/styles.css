@@ -55,6 +55,10 @@ text:focus:hover,
     color: light blue;
 }
 
+scrollbar:focus {
+    color: black;
+}
+
 text.my_class {
     color: green;
 }
