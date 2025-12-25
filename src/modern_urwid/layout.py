@@ -54,8 +54,10 @@ class Layout:
     def __init__(
         self,
         xml_path: str | Path,
-        css_path: str | Path,
+        css_path: str | Path | None = None,
         resources_cls=LayoutResources,
+        xml_dir=None,
+        css_dir=None,
     ) -> None:
         self.resources = resources_cls(self)
         self.custom_widgets = self.resources.get_widgets()
@@ -63,8 +65,18 @@ class Layout:
         self.widget_map = {}
         self.styles = {}
 
-        self.css_parser = CSSParser(Path(css_path))
+        self.css_path = css_path
+        if css_path is not None:
+            css_path = Path(css_path)
+            if isinstance(css_dir, Path):
+                css_path = css_dir / css_path
+            self.css_dir = css_path.parent
+        else:
+            self.css_dir = None
+        self.css_parser = CSSParser(css_path)
 
+        if isinstance(xml_dir, Path):
+            xml_path = xml_dir / xml_path
         self.xml_dir = Path(xml_path).parent
         xml = open(xml_path).read()
 
@@ -122,7 +134,7 @@ class Layout:
         element = wrapper.etree_element
         tag = element.tag
 
-        # Parse Attributes
+        # Parse attributes
         mu_kwargs, kwargs = self.parse_attrs(element.attrib)
         clazz = kwargs.pop("class", None)
         id = kwargs.pop("id", None)
@@ -130,7 +142,18 @@ class Layout:
         height = mu_kwargs.get("height")
         weight = mu_kwargs.get("weight")
 
-        # Apply Styling
+        # Parse children
+        signals = {}
+        children = list(wrapper.iter_children())
+        for child in wrapper.iter_mu_children():
+            el = child.etree_element
+            if el.tag == f"{XML_NS}signal":
+                signal_name = el.get("name")
+                signals[signal_name] = self.parse_attrs(el.attrib)
+            else:
+                children.append(child)
+
+        # Apply styling
         style, pseudos = self.css_parser.get_styles(root_palette, wrapper)
 
         normal_hash = md5(style)
@@ -143,22 +166,13 @@ class Layout:
             if focus_hash not in self.styles:
                 self.styles[focus_hash] = {**style.copy(), **pseudos["focus"]}
 
-        signals = {}
-        children = []
-        for child in element.getchildren():
-            if child.tag == f"{XML_NS}signal":
-                signal_name = child.get("name")
-                signals[signal_name] = self.parse_attrs(child.attrib)
-            else:
-                children.append(child)
-
         constructor = self.get_widget_constructor(tag)
         if constructor is None:
             return urwid.Filler(urwid.Text(f"Unknown tag: {tag}"))
         elif children:
             widget = constructor(
                 element,
-                [self.parse_element(child, style, child_class) for child in wrapper],
+                [self.parse_element(child, style, child_class) for child in children],
                 **kwargs,
             )
         else:
@@ -187,6 +201,10 @@ class Layout:
         return urwid.AttrMap(widget, normal_hash, focus_hash)
 
     def get_widget_constructor(self, tag):
+        if tag == f"{XML_NS}layout":
+            return lambda el, **kw: Layout(
+                xml_dir=self.xml_dir, css_dir=self.css_dir, **kw
+            ).get_root()
         cls_lower = tag.lower()
         for cls in self.custom_widgets:
             if cls_lower == cls.__name__.lower():

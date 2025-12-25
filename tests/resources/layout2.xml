@@ -1,6 +1,9 @@
 <linebox xmlns:mu="https://github.com/Jackkillian/modern-urwid" id="root">
-    <filler mu:height="1">
-        <text>Custom Layout</text>
-    </filler>
-    <customwidget />
+    <pile>
+        <filler mu:height="1">
+            <text>Custom Layout</text>
+        </filler>
+        <filler><text>More text</text></filler>
+        <customwidget />
+    </pile>
 </linebox>

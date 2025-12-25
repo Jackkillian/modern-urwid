@@ -53,7 +53,12 @@ def get_props(content):
 
 
 class CSSParser:
-    def __init__(self, path: Path):
+    def __init__(self, path: Path | None):
+        self.matcher = cssselect2.Matcher()
+
+        if path is None:
+            return
+
         if not path.exists():
             raise FileNotFoundError(f"Could not find stylesheet: {path} does not exist")
         elif not path.is_file():
@@ -61,7 +66,6 @@ class CSSParser:
 
         self.path = path
         self.dir = path.parent
-        self.matcher = cssselect2.Matcher()
 
         css = open(path).read()
         rules: list[Node] = tinycss2.parse_stylesheet(

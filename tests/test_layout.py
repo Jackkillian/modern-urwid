@@ -11,8 +11,12 @@ def test_layout_loads():
         def __init__(self):
             super().__init__(urwid.Filler(urwid.Text("Custom Widget")))
 
+    class CustomResources2(LayoutResources):
+        pass
+
     class CustomResources(LayoutResources):
         def __init__(self, layout):
+            self.Layout2Resources = CustomResources2
             super().__init__(
                 layout,
                 [CustomWidget],
