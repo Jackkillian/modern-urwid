@@ -76,3 +76,8 @@ text.my_class {
     color: black;
     background: brown;
 }
+
+.inverted {
+    color: black;
+    background: white;
+}

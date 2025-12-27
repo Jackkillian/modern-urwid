@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+import importlib
 import inspect
+import string
 from pathlib import Path
+from types import ModuleType
 
 import cssselect2
 import tinycss2
@@ -11,8 +14,8 @@ from lxml import etree
 from tinycss2.ast import Node
 
 from .constants import DEFAULT_STYLE, RESOURCE_CHAR, XML_NS
+from .css_parser import CSSParser
 from .exceptions import UnknownResource
-from .parser import CSSParser
 from .wrapper import FilteredWrapper
 
 
@@ -36,12 +39,15 @@ def create_text_widget(cls, el, **kw):
 class LayoutResources:
     """
     A base class for extending a layout's functionality
+    Reference properties from the base class (eg callbacks) with the "@" prefix
+    Reference properties from the data dictionary with "{}" surrounding the key (eg user.name)
     """
 
     def __init__(self, layout: Layout, widgets=[], palettes=[]):
         self.layout = layout
         self.widgets = widgets
         self.palettes = palettes
+        self.data = {}
 
     def get_widgets(self):
         return self.widgets
@@ -49,12 +55,31 @@ class LayoutResources:
     def get_palettes(self):
         return self.palettes
 
+    def load_resources_from_tag(self, element: etree.Element):
+        for child in element:
+            if child.tag == f"{XML_NS}python":
+                module_path = child.get("module")
+                alias = child.get("as")
+                module = importlib.import_module(module_path)
+                if alias:
+                    self.data[alias] = module
+                else:
+                    keys = module_path.split(".")
+                    target = self.data
+                    for key in keys[:-1]:
+                        if key not in target:
+                            target[key] = {}
+                            target = target[key]
+                        else:
+                            target = target[key]
+                    target[keys[-1]] = module
+
 
 class Layout:
     def __init__(
         self,
-        xml_path: str | Path,
-        css_path: str | Path | None = None,
+        xml_path: Path,
+        css_path: Path | None = None,
         resources_cls=LayoutResources,
         xml_dir=None,
         css_dir=None,
@@ -65,21 +90,25 @@ class Layout:
         self.widget_map = {}
         self.styles = {}
 
+        # Handle path stuff
         self.css_path = css_path
         if css_path is not None:
-            css_path = Path(css_path)
+            self.css_path = css_path
             if isinstance(css_dir, Path):
-                css_path = css_dir / css_path
-            self.css_dir = css_path.parent
+                self.css_path = css_dir / css_path
+            self.css_dir = self.css_path.parent
         else:
             self.css_dir = None
-        self.css_parser = CSSParser(css_path)
 
+        self.xml_path = xml_path
         if isinstance(xml_dir, Path):
-            xml_path = xml_dir / xml_path
-        self.xml_dir = Path(xml_path).parent
-        xml = open(xml_path).read()
+            self.xml_path = xml_dir / xml_path
+        self.xml_dir = self.xml_path.parent
 
+        # Load the xml and css
+        self.css_parser = CSSParser(self.css_path)
+
+        xml = open(self.xml_path).read()
         root = self.parse_element(
             FilteredWrapper.from_html_root(etree.fromstring(xml)),
             DEFAULT_STYLE,
@@ -113,7 +142,7 @@ class Layout:
                 elif v == "True":
                     target[k] = True
                 else:
-                    target[k] = v
+                    target[k] = self.parse_string_template(v)
         return mu, normal
 
     def get_resource(self, attr):
@@ -121,6 +150,30 @@ class Layout:
             return getattr(self.resources, attr)
         else:
             raise UnknownResource(f"Could not custom resource '@{attr}'")
+
+    def parse_string_template(self, template):
+        variables = [
+            field for _, field, _, _ in string.Formatter().parse(template) if field
+        ]
+        value = template
+        for variable in variables:
+            value = value.replace(f"{{{variable}}}", self.get_data_resource(variable))
+        return value
+
+    def get_data_resource(self, attr):
+        keys = attr.split(".")
+        value = self.resources.data
+        for key in keys:
+            if isinstance(value, dict):
+                if key not in value:
+                    raise ValueError(f"Could not find key '{key}' on {{{attr}}}")
+                value = value.get(key)
+            elif isinstance(value, ModuleType):
+                if hasattr(value, key):
+                    value = getattr(value, key)
+                else:
+                    raise ValueError(f"Could not find key '{key}' on {{{attr}}}")
+        return value
 
     def parse_element(
         self,
@@ -150,6 +203,8 @@ class Layout:
             if el.tag == f"{XML_NS}signal":
                 signal_name = el.get("name")
                 signals[signal_name] = self.parse_attrs(el.attrib)
+            elif el.tag == f"{XML_NS}resources":
+                self.resources.load_resources_from_tag(el)
             else:
                 children.append(child)
 
@@ -229,3 +284,9 @@ class Layout:
 
     def get_widget_by_id(self, id) -> urwid.Widget | None:
         return self.widget_map.get(id)
+
+    def on_enter(self):
+        pass
+
+    def on_exit(self):
+        pass

@@ -3,7 +3,7 @@
         <filler mu:height="1">
             <text>Custom Layout</text>
         </filler>
-        <filler><text>More text</text></filler>
+        <filler class="inverted"><text>More text</text></filler>
         <customwidget />
     </pile>
 </linebox>

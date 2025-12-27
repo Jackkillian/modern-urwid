@@ -1,5 +1,5 @@
 import importlib.resources
-import time
+from pathlib import Path
 
 import urwid
 
@@ -39,7 +39,7 @@ def test_layout_loads():
 
     layout_file = importlib.resources.files("tests") / "resources" / "layout.xml"
     styles_file = importlib.resources.files("tests") / "resources" / "styles.css"
-    layout = Layout(str(layout_file), str(styles_file), CustomResources)
+    layout = Layout(Path(layout_file), Path(styles_file), CustomResources)
 
     assert isinstance(layout.get_root(), urwid.AttrMap)
     assert isinstance(layout.get_root().base_widget, urwid.Pile)
