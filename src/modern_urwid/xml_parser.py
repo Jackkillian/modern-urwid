@@ -170,6 +170,22 @@ class XMLParser:
 
         return urwid.AttrMap(widget, normal_hash, focus_hash)
 
+    def style_widget(self, widget: urwid.Widget, classes=[], id=[]) -> urwid.AttrMap:
+        style, pseudos = self.css_parser.get_styles_by_attr(DEFAULT_STYLE, classes, id)
+
+        normal_hash = md5(style)
+        if normal_hash not in self.styles:
+            self.styles[normal_hash] = style
+
+        focus_hash = None
+        if (
+            "focus" in pseudos
+            and (focus_hash := md5(pseudos["focus"])) not in self.styles
+        ):
+            self.styles[focus_hash] = {**style.copy(), **pseudos["focus"]}
+
+        return urwid.AttrMap(widget, normal_hash, focus_hash)
+
     def get_widget_constructor(
         self, tag
     ) -> (

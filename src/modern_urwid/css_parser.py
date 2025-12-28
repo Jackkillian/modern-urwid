@@ -160,3 +160,39 @@ class CSSParser:
                 if sel_str in self.pseudo_map:
                     pseudos = self.pseudo_map[sel_str]
         return style, pseudos
+
+    def get_styles_by_attr(self, default, classes=[], id=None):
+        style = default.copy()
+        pseudos = {}
+        if matches := self.match(classes, id):
+            matches.sort()
+            for match in matches:
+                specificity, order, pseudo, payload = match
+                sel_str, data = payload
+                style.update(data)
+                if sel_str in self.pseudo_map:
+                    pseudos = self.pseudo_map[sel_str]
+        return style, pseudos
+
+    def match(self, classes=[], id: str | None = None):
+        relevant_selectors = []
+
+        if id is not None and id in self.matcher.id_selectors:
+            for test, specificity, order, pseudo, payload in self.matcher.id_selectors[
+                id
+            ]:
+                relevant_selectors.append((specificity, order, pseudo, payload))
+
+        for class_name in classes:
+            if class_name in self.matcher.class_selectors:
+                for (
+                    test,
+                    specificity,
+                    order,
+                    pseudo,
+                    payload,
+                ) in self.matcher.class_selectors[class_name]:
+                    relevant_selectors.append((specificity, order, pseudo, payload))
+
+        relevant_selectors.sort()
+        return relevant_selectors

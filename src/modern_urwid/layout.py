@@ -124,6 +124,15 @@ class LayoutResourceHandler(ResourceHandler):
     def get_css_variables(self) -> dict[str, str]:
         return self.css_variables
 
+    def on_load(self):
+        return
+
+    def on_enter(self):
+        pass
+
+    def on_exit(self):
+        pass
+
 
 class Layout:
     def __init__(
@@ -155,10 +164,14 @@ class Layout:
     def register_widgets(self, widgets: list[type[WidgetBuilder]]):
         self.resources.widgets.extend(widgets)
 
+    def style_widget(self, widget: urwid.Widget, classes=[], id=None) -> urwid.AttrMap:
+        return self.xml_parser.style_widget(widget, classes, id)
+
     def load(self):
         """Parse the XML and CSS"""
         self.css_parser = CSSParser(self.css_path, self.resources.get_css_variables())
         self.xml_parser = XMLParser(self.xml_path, self.resources, self.css_parser)
+        self.resources.on_load()
         return self
 
     def get_root(self):
@@ -173,7 +186,7 @@ class Layout:
         return self.xml_parser.get_widget_by_id(id)
 
     def on_enter(self):
-        pass
+        self.resources.on_enter()
 
     def on_exit(self):
-        pass
+        self.resources.on_exit()

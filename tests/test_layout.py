@@ -33,6 +33,18 @@ def test_layout_loads():
             if isinstance(widget, urwid.Text):
                 widget.set_text(text)
 
+        def on_load(self):
+            widget = self.layout.get_widget_by_id("dynamic")
+            if isinstance(widget, urwid.ListBox):
+                widget.body.extend(
+                    [
+                        self.layout.style_widget(
+                            urwid.Button(f"Dynamic Button {i}"), id="root"
+                        )
+                        for i in range(10)
+                    ]
+                )
+
     manager = LayoutManager()
 
     @manager.register_widget()

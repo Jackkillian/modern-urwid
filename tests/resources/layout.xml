@@ -59,21 +59,7 @@
     </columns>
     <customwidgetfromxml mu:height="1" />
     <scrollbar>
-        <listbox>
-            <text markup="Text 1" />
-            <text markup="Text 2" />
-            <text markup="Text 3" />
-            <text markup="Text 4" />
-            <text markup="Text 5" />
-            <text markup="Text 6" />
-            <text markup="Text 7" />
-            <text markup="Text 8" />
-            <text markup="Text 9" />
-            <text markup="Text 10" />
-            <text markup="Text 11" />
-            <text markup="Text 12" />
-            <text markup="Text 13" />
-        </listbox>
+        <listbox id="dynamic" />
     </scrollbar>
     <mu:layout
         xml_path="layout2.xml"
