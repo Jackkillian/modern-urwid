@@ -28,6 +28,7 @@ dependencies = [
   "tinycss2",
   "cssselect2",
   "lxml",
+  "types-lxml",
   "dict_hash",
 ]
 

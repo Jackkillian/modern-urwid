@@ -3,23 +3,18 @@ from pathlib import Path
 
 import urwid
 
-from modern_urwid import Layout, LayoutResources
+from modern_urwid import Layout, LayoutManager, LayoutResourceHandler, WidgetBuilder
 
 
 def test_layout_loads():
-    class CustomWidget(urwid.WidgetWrap):
-        def __init__(self):
-            super().__init__(urwid.Filler(urwid.Text("Custom Widget")))
-
-    class CustomResources2(LayoutResources):
+    class CustomResources2(LayoutResourceHandler):
         pass
 
-    class CustomResources(LayoutResources):
+    class CustomResources(LayoutResourceHandler):
         def __init__(self, layout):
-            self.Layout2Resources = CustomResources2
+            self.Layout2Resources = CustomResources2(layout)
             super().__init__(
                 layout,
-                [CustomWidget],
                 [
                     ("pb_empty", "white", "black"),
                     ("pb_full", "black", "light blue"),
@@ -41,14 +36,32 @@ def test_layout_loads():
     styles_file = importlib.resources.files("tests") / "resources" / "styles.css"
     layout = Layout(Path(layout_file), Path(styles_file), CustomResources)
 
+    manager = LayoutManager()
+
+    @manager.register_widget()
+    class CustomWidget(WidgetBuilder):
+        def build(self, **kwargs):
+            return urwid.Filler(urwid.Text("This is a custom widget!"))
+
+    @manager.register_widget()
+    class CustomWidgetFromXML(WidgetBuilder):
+        def build(self, **kwargs):
+            parser = self.render_from_xml(
+                Path(importlib.resources.files("tests") / "resources" / "widget.xml"),
+                css_path=Path(
+                    importlib.resources.files("tests") / "resources" / "widget.css"
+                ),
+            )
+            manager.register_palette(parser.get_palettes())
+            return parser.get_root()
+
+    manager.register("layout", layout)
+
     assert isinstance(layout.get_root(), urwid.AttrMap)
     assert isinstance(layout.get_root().base_widget, urwid.Pile)
 
-    loop = urwid.MainLoop(
-        layout.root,
-        palette=layout.palettes,
-    )
-    loop.run()
+    manager.switch("layout")
+    manager.get_loop().run()
 
     # loop.start()
     # loop.screen.clear()

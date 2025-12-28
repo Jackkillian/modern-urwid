@@ -1,5 +1,5 @@
 # modern-urwid
-A small library providing various QOL urwid utilities.
+An urwid library for creating TUIs from XML and CSS
 
 ## Installation
 Instal with:  

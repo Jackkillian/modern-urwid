@@ -60,6 +60,7 @@
         <filler mu:weight="75"><text class="col1">Col 1</text></filler>
         <filler mu:weight="25"><text class="col2">Col 2</text></filler>
     </columns>
+    <customwidgetfromxml mu:height="1" />
     <scrollbar>
         <listbox>
             <text markup="Text 1" />
@@ -77,6 +78,10 @@
             <text markup="Text 13" />
         </listbox>
     </scrollbar>
-    <mu:layout xml_path="layout2.xml" resources_cls="@Layout2Resources" />
+    <mu:layout
+        xml_path="layout2.xml"
+        css_path="layout2.css"
+        resources="@Layout2Resources"
+    />
     <customwidget />
 </pile>

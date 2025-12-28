@@ -67,7 +67,7 @@ class CSSParser:
         self.path = path
         self.dir = path.parent
 
-        css = open(path).read()
+        css = path.read_text()
         rules: list[Node] = tinycss2.parse_stylesheet(
             css,
             skip_comments=True,
