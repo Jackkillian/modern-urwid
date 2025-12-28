@@ -6,7 +6,7 @@ Instal with:
 `pip install modern-urwid`
 
 ## Features
-- Read XML and CSS files and parse them into urwid Widgets using the `Layout` and `LayoutResources` classes
+- Read XML and CSS files and parse them into urwid Widgets
 
 ### Example
 Python:
