@@ -32,10 +32,6 @@ def test_layout_loads():
             if isinstance(widget, urwid.Text):
                 widget.set_text(text)
 
-    layout_file = importlib.resources.files("tests") / "resources" / "layout.xml"
-    styles_file = importlib.resources.files("tests") / "resources" / "styles.css"
-    layout = Layout(Path(layout_file), Path(styles_file), CustomResources)
-
     manager = LayoutManager()
 
     @manager.register_widget()
@@ -55,7 +51,14 @@ def test_layout_loads():
             manager.register_palette(parser.get_palettes())
             return parser.get_root()
 
-    manager.register("layout", layout)
+    manager.register(
+        "layout",
+        layout := Layout(
+            Path(importlib.resources.files("tests") / "resources" / "layout.xml"),
+            Path(importlib.resources.files("tests") / "resources" / "styles.css"),
+            CustomResources,
+        ),
+    )
 
     assert isinstance(layout.get_root(), urwid.AttrMap)
     assert isinstance(layout.get_root().base_widget, urwid.Pile)
