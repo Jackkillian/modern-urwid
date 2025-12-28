@@ -2,7 +2,14 @@ from pathlib import Path
 
 import cssselect2
 import tinycss2
-from tinycss2.ast import Node, WhitespaceToken
+from tinycss2.ast import (
+    Declaration,
+    FunctionBlock,
+    IdentToken,
+    LiteralToken,
+    Node,
+    WhitespaceToken,
+)
 
 
 def pop_pseudos_from_tokens(tokens):
@@ -40,20 +47,55 @@ def split_tokens_by_comma(tokens):
     return selectors
 
 
-def get_props(content):
-    decls = tinycss2.parse_declaration_list(
-        content, skip_comments=True, skip_whitespace=True
+def get_props(tokens, variables):
+    modified = [
+        IdentToken(-1, -1, variables.get(token.arguments[0].value))
+        if isinstance(token, FunctionBlock)
+        else token
+        for token in tokens
+    ]
+    decls: list[Declaration] = tinycss2.parse_declaration_list(
+        modified, skip_comments=True, skip_whitespace=True
     )
     return {
         decl.name: "".join(
             [token.value for token in decl.value if hasattr(token, "value")]
         ).strip()
         for decl in decls
+        if not decl.name.startswith("--")
     }
 
 
+def get_tokens_value(tokens: list[Node]) -> str:
+    value = ""
+    for token in tokens:
+        value += token.serialize()
+    return value
+
+
+def split_decl(tokens):
+    result = []
+    name = []
+    value = []
+    in_name = True
+    for token in tokens:
+        if token.type == "literal":
+            if token.value == ":":
+                in_name = False
+            elif token.value == ";":
+                in_name = True
+                result.append((name.copy(), value.copy()))
+                name.clear()
+                value.clear()
+        elif in_name and not token.type == "whitespace":
+            name.append(token)
+        elif not in_name:
+            value.append(token)
+    return result
+
+
 class CSSParser:
-    def __init__(self, path: Path | None):
+    def __init__(self, path: Path | None, variables_override: dict[str, str] = {}):
         self.matcher = cssselect2.Matcher()
 
         if path is None:
@@ -73,13 +115,23 @@ class CSSParser:
             skip_comments=True,
             skip_whitespace=True,
         )
-        self.parse_rules(rules)
+        self.parse_rules(rules, variables_override)
 
-    def parse_rules(self, rules):
+    def parse_rules(self, rules, variables={}):
         self.pseudo_map = {}
         for rule in rules:
+            if rule.type != "qualified-rule":
+                continue
+
+            for name, value in split_decl(rule.content):
+                name = get_tokens_value(name)
+                value = get_tokens_value(value).strip()
+                if name.startswith("--"):
+                    if name not in variables:
+                        variables[name] = value
+
             element_selectors: list[list[Node]] = split_tokens_by_comma(rule.prelude)
-            props = get_props(rule.content)
+            props = get_props(rule.content, variables)
             for selectors in element_selectors:
                 compiled = cssselect2.compile_selector_list(selectors)
 

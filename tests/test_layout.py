@@ -15,10 +15,11 @@ def test_layout_loads():
             self.Layout2Resources = CustomResources2(layout)
             super().__init__(
                 layout,
-                [
+                palettes=[
                     ("pb_empty", "white", "black"),
                     ("pb_full", "black", "light blue"),
                 ],
+                css_variables={"--my-var": "light gray"},
             )
 
         def quit_callback(self, w):

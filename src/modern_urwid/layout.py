@@ -46,11 +46,16 @@ class LayoutResourceHandler(ResourceHandler):
     """
 
     def __init__(
-        self, layout: Layout, palettes=[], widgets: list[type[WidgetBuilder]] = []
+        self,
+        layout: Layout,
+        palettes=[],
+        widgets: list[type[WidgetBuilder]] = [],
+        css_variables: dict[str, str] = {},
     ):
         self.layout = layout
         self.palettes = palettes
         self.widgets = widgets
+        self.css_variables = css_variables
         self.data = {}
 
     def get_palettes(self):
@@ -116,6 +121,9 @@ class LayoutResourceHandler(ResourceHandler):
             if cls_lower == cls.__name__.lower():
                 return cls
 
+    def get_css_variables(self) -> dict[str, str]:
+        return self.css_variables
+
 
 class Layout:
     def __init__(
@@ -127,7 +135,6 @@ class Layout:
         css_dir=None,
     ) -> None:
         self.resources = resources_cls(self)
-        self.palettes = self.resources.get_palettes()
         self.widget_map = {}
 
         # Handle path stuff
@@ -150,7 +157,7 @@ class Layout:
 
     def load(self):
         """Parse the XML and CSS"""
-        self.css_parser = CSSParser(self.css_path)
+        self.css_parser = CSSParser(self.css_path, self.resources.get_css_variables())
         self.xml_parser = XMLParser(self.xml_path, self.resources, self.css_parser)
         return self
 
@@ -158,7 +165,9 @@ class Layout:
         return self.xml_parser.get_root()
 
     def get_palettes(self):
-        return self.xml_parser.get_palettes()
+        if (palettes := self.resources.get_palettes()) is None:
+            palettes = []
+        return self.xml_parser.get_palettes() + palettes
 
     def get_widget_by_id(self, id) -> urwid.Widget | None:
         return self.xml_parser.get_widget_by_id(id)

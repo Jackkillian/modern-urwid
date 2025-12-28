@@ -1,10 +1,15 @@
-#root {
-    color: black;
-    background: dark gray;
+:root {
+    --default-color: dark green;
+    --my-var: light red;
 }
 
 edit {
+    color: var(--default-color);
+}
+
+#root {
     color: black;
+    background: var(--my-var);
 }
 
 linebox {
