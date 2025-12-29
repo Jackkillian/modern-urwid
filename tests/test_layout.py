@@ -76,8 +76,11 @@ def test_layout_loads():
     assert isinstance(layout.get_root(), urwid.AttrMap)
     assert isinstance(layout.get_root().base_widget, urwid.Pile)
 
+    screen: urwid.display.raw.Screen = manager.get_loop().screen
+    screen.set_terminal_properties(2**24)
+
     manager.switch("layout")
-    manager.get_loop().run()
+    manager.run()
 
     # loop.start()
     # loop.screen.clear()

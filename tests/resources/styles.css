@@ -10,6 +10,7 @@ edit {
 #root {
     color: black;
     background: var(--my-var);
+    background-adv: #fff;
 }
 
 linebox {

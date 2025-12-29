@@ -1,10 +1,12 @@
 from pathlib import Path
+from re import L
 
 import cssselect2
 import tinycss2
 from tinycss2.ast import (
     Declaration,
     FunctionBlock,
+    HashToken,
     IdentToken,
     LiteralToken,
     Node,
@@ -59,7 +61,11 @@ def get_props(tokens, variables):
     )
     return {
         decl.name: "".join(
-            [token.value for token in decl.value if hasattr(token, "value")]
+            [
+                "#" + token.value if isinstance(token, HashToken) else token.value
+                for token in decl.value
+                if hasattr(token, "value")
+            ]
         ).strip()
         for decl in decls
         if not decl.name.startswith("--")
