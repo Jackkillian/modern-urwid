@@ -4,3 +4,4 @@ __pycache__/
 .zed/
 docs/build/
 docs/source/generated/
+dist/

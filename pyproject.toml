@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "modern-urwid"
 dynamic = ["version"]
-description = 'Various QOL utilities for urwid'
+description = "An urwid library for creating TUIs from XML and CSS"
 readme = "README.md"
 requires-python = ">=3.9"
 license = "MIT"
