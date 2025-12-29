@@ -67,3 +67,7 @@ class LayoutManager:
     def get_loop(self) -> urwid.MainLoop:
         """Get the urwid :class:`~urwid.MainLoop`"""
         return self.loop
+
+    def run(self):
+        """Run the urwid :class:`~urwid.MainLoop`"""
+        self.loop.run()
