@@ -27,7 +27,7 @@ class ResourceHandler:
             f"Could not parse element: {element} - load_resources_from_tag() not implemented"
         )
 
-    def get_widget_builder(self, tag: str) -> type["WidgetBuilder"] | None:
+    def get_widget_builder(self, tag: str) -> Union[type["WidgetBuilder"], None]:
         """Get a widget builder for a custom widget tag."""
         return None
 

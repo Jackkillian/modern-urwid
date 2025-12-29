@@ -4,6 +4,7 @@ import importlib
 import string
 from pathlib import Path
 from types import ModuleType
+from typing import Union
 
 import urwid
 from lxml import etree
@@ -97,7 +98,7 @@ class LayoutResourceHandler(ResourceHandler):
                             target = target[key]
                     target[keys[-1]] = module
 
-    def get_widget_builder(self, tag: str) -> type[WidgetBuilder] | None:
+    def get_widget_builder(self, tag: str) -> Union[type[WidgetBuilder], None]:
         cls_lower = tag.lower()
         for cls in self.widgets:
             if cls_lower == cls.__name__.lower():
@@ -131,7 +132,7 @@ class Layout:
     def __init__(
         self,
         xml_path: Path,
-        css_path: Path | None = None,
+        css_path: Union[Path, None] = None,
         resources_cls=LayoutResourceHandler,
         xml_dir=None,
         css_dir=None,
@@ -179,7 +180,7 @@ class Layout:
             palettes = []
         return self.xml_parser.get_palettes() + palettes
 
-    def get_widget_by_id(self, id) -> urwid.Widget | None:
+    def get_widget_by_id(self, id) -> Union[urwid.Widget, None]:
         """Get a widget by its ``id`` attribute."""
         return self.xml_parser.get_widget_by_id(id)
 

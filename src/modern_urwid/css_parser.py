@@ -1,5 +1,6 @@
 from pathlib import Path
 from re import L
+from typing import Union
 
 import cssselect2
 import tinycss2
@@ -101,7 +102,9 @@ def split_decl(tokens):
 
 
 class CSSParser:
-    def __init__(self, path: Path | None, variables_override: dict[str, str] = {}):
+    def __init__(
+        self, path: Union[Path, None], variables_override: dict[str, str] = {}
+    ):
         self.matcher = cssselect2.Matcher()
 
         if path is None:
@@ -189,7 +192,7 @@ class CSSParser:
                     pseudos = self.pseudo_map[sel_str]
         return style, pseudos
 
-    def match(self, classes=[], id: str | None = None):
+    def match(self, classes=[], id: Union[str, None] = None):
         relevant_selectors = []
 
         if id is not None and id in self.matcher.id_selectors:

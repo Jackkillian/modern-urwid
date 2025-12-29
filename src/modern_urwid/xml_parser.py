@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import inspect
 from pathlib import Path
-from typing import Callable, Literal
+from typing import Callable, Literal, Union
 
 import urwid
 from dict_hash import md5
@@ -37,7 +37,7 @@ class XMLParser:
         xml_path: Path,
         resources: ResourceHandler = ResourceHandler(),
         css_parser: CSSParser = CSSParser(None),
-        xml_dir: Path | None = None,
+        xml_dir: Union[Path, None] = None,
     ) -> None:
         self.widget_map = {}
         self.styles = {}
@@ -92,12 +92,12 @@ class XMLParser:
         self,
         wrapper: FilteredWrapper,
         root_palette: dict,
-        child_class: str | None = None,
-    ) -> (
-        urwid.Widget
-        | tuple[int, urwid.Widget]
-        | tuple[Literal["weight"], int, urwid.Widget]
-    ):
+        child_class: Union[str, None] = None,
+    ) -> Union[
+        urwid.Widget,
+        tuple[int, urwid.Widget],
+        tuple[Literal["weight"], int, urwid.Widget],
+    ]:
         if child_class is not None:
             wrapper.classes |= {child_class}
 
@@ -188,13 +188,13 @@ class XMLParser:
 
     def get_widget_constructor(
         self, tag
-    ) -> (
+    ) -> Union[
         Callable[
-            [etree.Element, list[urwid.Widget | urwid.WidgetContainerMixin]],
-            urwid.Widget | urwid.WidgetContainerMixin,
-        ]
-        | None
-    ):
+            [etree.Element, list[Union[urwid.Widget, urwid.WidgetContainerMixin]]],
+            Union[urwid.Widget, urwid.WidgetContainerMixin],
+        ],
+        None,
+    ]:
         if tag == f"{XML_NS}layout":
 
             def fun(el, children, **kw):
@@ -236,5 +236,5 @@ class XMLParser:
         else:
             return None
 
-    def get_widget_by_id(self, id) -> urwid.Widget | None:
+    def get_widget_by_id(self, id) -> Union[urwid.Widget, None]:
         return self.widget_map.get(id)

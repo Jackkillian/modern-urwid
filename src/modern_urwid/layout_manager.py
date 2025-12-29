@@ -1,4 +1,5 @@
 from types import LambdaType
+from typing import Union
 
 import urwid
 
@@ -12,13 +13,13 @@ class LayoutManager:
     between them.
     """
 
-    def __init__(self, loop: urwid.MainLoop | None = None):
+    def __init__(self, loop: Union[urwid.MainLoop, None] = None):
         if loop is None:
             self.loop = urwid.MainLoop(urwid.Text(""))
         else:
             self.loop: urwid.MainLoop = loop
         self.layouts: dict[str, Layout] = {}
-        self.current: str | None = None
+        self.current: Union[str, None] = None
         self.widgets: list[type[urwid.WidgetBuilder]] = []
 
     def register(self, name: str, layout: Layout):
@@ -47,7 +48,9 @@ class LayoutManager:
         """Register a set of palette entries in the urwid :class:`~urwid.MainLoop`."""
         self.loop.screen.register_palette(palette)
 
-    def register_widget(self, cls: type[WidgetBuilder] | None = None) -> LambdaType:
+    def register_widget(
+        self, cls: Union[type[WidgetBuilder], None] = None
+    ) -> LambdaType:
         """
         Register a custom widget builder.
 

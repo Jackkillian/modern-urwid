@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Union
 
 import urwid
 from lxml import etree
@@ -17,7 +18,7 @@ class WidgetBuilder:
     def __init__(
         self,
         element: etree.Element,
-        children: list[urwid.Widget | urwid.WidgetContainerMixin] = [],
+        children: list[Union[urwid.Widget, urwid.WidgetContainerMixin]] = [],
     ):
         self.element = element
         self.children = children
@@ -30,7 +31,7 @@ class WidgetBuilder:
         self,
         xml_path: Path,
         resource_handler=ResourceHandler(),
-        css_path: Path | None = None,
+        css_path: Union[Path, None] = None,
     ) -> XMLParser:
         """Render a widget from XML. Note: ``XMLParser.styles`` will need to be registered in urwid palettes."""
         return XMLParser(xml_path, resource_handler, CSSParser(css_path))
