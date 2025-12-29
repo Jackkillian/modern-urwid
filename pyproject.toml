@@ -33,7 +33,7 @@ dependencies = [
 ]
 
 [project.urls]
-Documentation = "https://github.com/Jackkillian/modern-urwid#readme"
+Documentation = "https://modern-urwid.readthedocs.io/en/latest/"
 Issues = "https://github.com/Jackkillian/modern-urwid/issues"
 Source = "https://github.com/Jackkillian/modern-urwid"
 
