@@ -51,6 +51,7 @@ check = "mypy --install-types --non-interactive {args:src/modern_urwid tests}"
 dependencies = [
   "sphinx>=7.0",
   "sphinx-autodoc-typehints",
+  "sphinx-rtd-theme",
 ]
 
 [tool.hatch.envs.docs.scripts]
