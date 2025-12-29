@@ -40,6 +40,20 @@ Source = "https://github.com/Jackkillian/modern-urwid"
 [tool.hatch.version]
 path = "src/modern_urwid/__about__.py"
 
+[[tool.hatch.envs.hatch-test.matrix]]
+python = ["3.9"]
+
+[tool.hatch.envs.hatch-test]
+dependencies = [
+  "coverage-enable-subprocess==1.0",
+  "coverage[toml]<7.11",
+  "pytest~=8.1",
+  "pytest-mock~=3.12",
+  "pytest-randomly~=3.15",
+  "pytest-rerunfailures~=14.0",
+  "pytest-xdist[psutil]~=3.5",
+]
+
 [tool.hatch.envs.types]
 extra-dependencies = [
   "mypy>=1.0.0",
