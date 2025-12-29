@@ -47,6 +47,16 @@ extra-dependencies = [
 [tool.hatch.envs.types.scripts]
 check = "mypy --install-types --non-interactive {args:src/modern_urwid tests}"
 
+[tool.hatch.envs.docs]
+dependencies = [
+  "sphinx>=7.0",
+  "sphinx-autodoc-typehints",
+]
+
+[tool.hatch.envs.docs.scripts]
+build = "sphinx-build -b html docs/source docs/build"
+clean = "rm -rf docs/build"
+
 [tool.coverage.run]
 source_pkgs = ["modern_urwid", "tests"]
 branch = true
