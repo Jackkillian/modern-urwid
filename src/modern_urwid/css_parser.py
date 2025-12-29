@@ -163,8 +163,17 @@ class CSSParser:
                 specificity, order, pseudo, payload = match
                 sel_str, data = payload
                 style.update(data)
+
+                # Default to 8-bit colors if true colors are not defined
+                if "color-adv" not in data:
+                    style["color-adv"] = style["color"]
+
+                if "background-adv" not in data:
+                    style["background-adv"] = style["background"]
+
                 if sel_str in self.pseudo_map:
                     pseudos = self.pseudo_map[sel_str]
+
         return style, pseudos
 
     def get_styles_by_attr(self, default, classes=[], id=None):
