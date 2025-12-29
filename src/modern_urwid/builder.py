@@ -11,7 +11,7 @@ from .xml_parser import XMLParser
 class WidgetBuilder:
     """
     Utility class used to build custom widgets. Widgets can be made
-    with Python or XML. Use the `LayoutManager.register_widget()` decorator to register.
+    with Python or XML. Use the ``LayoutManager.register_widget()`` decorator to register.
     """
 
     def __init__(
@@ -23,7 +23,7 @@ class WidgetBuilder:
         self.children = children
 
     def build(self, **kwargs) -> urwid.Widget:
-        """Build the widget. When overriding, use the `self.manager`, `self.element`, `self.children` if applicable."""
+        """Build the widget. When overriding, use the ``self.manager``, ``self.element``, ``self.children`` if applicable."""
         return urwid.Widget(**kwargs)
 
     def render_from_xml(
@@ -32,5 +32,5 @@ class WidgetBuilder:
         resource_handler=ResourceHandler(),
         css_path: Path | None = None,
     ) -> XMLParser:
-        """Render a widget from XML. Note: `XMLParser.styles` will need to be registered in urwid palettes"""
+        """Render a widget from XML. Note: ``XMLParser.styles`` will need to be registered in urwid palettes."""
         return XMLParser(xml_path, resource_handler, CSSParser(css_path))

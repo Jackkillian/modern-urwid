@@ -52,6 +52,8 @@ dependencies = [
   "sphinx>=7.0",
   "sphinx-autodoc-typehints",
   "sphinx-rtd-theme",
+  "myst_parser",
+  "linkify-it-py",
 ]
 
 [tool.hatch.envs.docs.scripts]

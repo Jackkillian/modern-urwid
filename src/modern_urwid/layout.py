@@ -1,48 +1,28 @@
 from __future__ import annotations
 
 import importlib
-import inspect
 import string
 from pathlib import Path
-from types import LambdaType, ModuleType
-from typing import Callable
+from types import ModuleType
 
 import urwid
-from dict_hash import md5
 from lxml import etree
 
 from modern_urwid.resource_handler import ResourceHandler
 from modern_urwid.xml_parser import XMLParser
 
 from .builder import WidgetBuilder
-from .constants import DEFAULT_STYLE, RESOURCE_CHAR, XML_NS
+from .constants import XML_NS
 from .css_parser import CSSParser
 from .exceptions import UnknownResource
-from .wrapper import FilteredWrapper
-
-
-def find_urwid_class(tag: str):
-    tag = tag.lower()
-    for name, cls in inspect.getmembers(urwid, inspect.isclass):
-        if name.lower() == tag:
-            return cls
-    return None
-
-
-def create_text_widget(cls, el, **kw):
-    if el.text and el.text.strip():
-        return cls(
-            el.text, **kw
-        )  # can't do .strip because it'll  remove the space if doing something like 'Name: '
-    else:
-        return cls(**kw)
 
 
 class LayoutResourceHandler(ResourceHandler):
     """
-    A base class for extending a layout's functionality
-    Reference properties from the base class (eg callbacks) with the "@" prefix
-    Reference properties from the data dictionary with "{}" surrounding the key (eg user.name)
+    A base class for extending a layout's functionality.
+
+    Reference properties from the base class (e.g. callbacks) with the ``@`` prefix.
+    Reference properties from the data dictionary with brackets surrounding the key (e.g. ``"{user.name}"``).
     """
 
     def __init__(
@@ -59,9 +39,11 @@ class LayoutResourceHandler(ResourceHandler):
         self.data = {}
 
     def get_palettes(self):
+        """Get custom palettes."""
         return self.palettes
 
     def get_resource(self, name):
+        """Get a custom resource (typically referenced by ``@ResourceName`` in XML)."""
         if hasattr(self, name):
             return getattr(self, name)
         else:
@@ -125,16 +107,27 @@ class LayoutResourceHandler(ResourceHandler):
         return self.css_variables
 
     def on_load(self):
+        """Called when loading the parent layout in :meth:`~modern_urwid.layout_manager.LayoutManager.register`."""
         return
 
     def on_enter(self):
+        """Called when the parent layout is rendered on the mainloop with :meth:`~modern_urwid.layout_manager.LayoutManager.switch`."""
         pass
 
     def on_exit(self):
+        """Called when the parent layout is removed from the mainloop with :meth:`~modern_urwid.layout_manager.LayoutManager.switch`."""
         pass
 
 
 class Layout:
+    """
+    Create a UI layout from XML and CSS.
+
+    This class is responsible for parsing XML and applying
+    CSS styles to the created widgets. The root widget can
+    be referenced with :meth:`get_root`.
+    """
+
     def __init__(
         self,
         xml_path: Path,
@@ -162,31 +155,38 @@ class Layout:
         self.xml_dir = self.xml_path.parent
 
     def register_widgets(self, widgets: list[type[WidgetBuilder]]):
+        """Add custom widget builders for the XML parser. Note: do this before calling :meth:`load`."""
         self.resources.widgets.extend(widgets)
 
     def style_widget(self, widget: urwid.Widget, classes=[], id=None) -> urwid.AttrMap:
+        """Style a widget according to any given classes or id it may have."""
         return self.xml_parser.style_widget(widget, classes, id)
 
     def load(self):
-        """Parse the XML and CSS"""
+        """Parse the XML and CSS. Make sure to call :meth:`register_widgets` first if neccessary."""
         self.css_parser = CSSParser(self.css_path, self.resources.get_css_variables())
         self.xml_parser = XMLParser(self.xml_path, self.resources, self.css_parser)
         self.resources.on_load()
         return self
 
-    def get_root(self):
+    def get_root(self) -> urwid.Widget:
+        """Get the root XML widget that can be rendered."""
         return self.xml_parser.get_root()
 
     def get_palettes(self):
+        """Get all palettes used in this layout."""
         if (palettes := self.resources.get_palettes()) is None:
             palettes = []
         return self.xml_parser.get_palettes() + palettes
 
     def get_widget_by_id(self, id) -> urwid.Widget | None:
+        """Get a widget by its ``id`` attribute."""
         return self.xml_parser.get_widget_by_id(id)
 
     def on_enter(self):
+        """Called when this is rendered on the mainloop with :meth:`~modern_urwid.layout_manager.LayoutManager.switch`."""
         self.resources.on_enter()
 
     def on_exit(self):
+        """Called when this is removed from the mainloop with :meth:`~modern_urwid.layout_manager.LayoutManager.switch`."""
         self.resources.on_exit()
