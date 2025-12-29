@@ -1,4 +1,5 @@
 import sys
+from importlib.metadata import version as pkg_version
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
@@ -9,6 +10,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 project = "modern-urwid"
 copyright = "2025, Jack Freund"
 author = "Jack Freund"
+
+release = pkg_version("modern-urwid")
+version = ".".join(release.split(".")[:2])
 
 release = "0.1"
 version = "0.1.0"
