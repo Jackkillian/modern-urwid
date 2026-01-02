@@ -1,5 +1,6 @@
 from .builder import WidgetBuilder
 from .constants import RESOURCE_CHAR, XML_NS
+from .decorators import widget
 from .exceptions import InvalidTemplate, UnknownResource
 from .layout import Layout, LayoutResourceHandler
 from .layout_manager import LayoutManager
@@ -13,4 +14,5 @@ __all__ = [
     "InvalidTemplate",
     "XML_NS",
     "RESOURCE_CHAR",
+    "widget",
 ]

@@ -59,7 +59,7 @@
     </columns>
     <customwidgetfromxml mu:height="1" />
     <scrollbar>
-        <listbox id="dynamic" />
+        <listbox id="dynamic_listbox" />
     </scrollbar>
     <mu:layout
         xml_path="layout2.xml"

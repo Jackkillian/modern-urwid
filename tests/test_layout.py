@@ -3,6 +3,7 @@ from pathlib import Path
 
 import urwid
 
+import modern_urwid
 from modern_urwid import Layout, LayoutManager, LayoutResourceHandler, WidgetBuilder
 
 
@@ -11,6 +12,9 @@ def test_layout_loads():
         pass
 
     class CustomResources(LayoutResourceHandler):
+        @modern_urwid.widget("dynamic_listbox")
+        def my_listbox(self) -> urwid.ListBox: ...
+
         def __init__(self, layout):
             self.Layout2Resources = CustomResources2(layout)
             super().__init__(
@@ -34,16 +38,14 @@ def test_layout_loads():
                 widget.set_text(text)
 
         def on_load(self):
-            widget = self.layout.get_widget_by_id("dynamic")
-            if isinstance(widget, urwid.ListBox):
-                widget.body.extend(
-                    [
-                        self.layout.style_widget(
-                            urwid.Button(f"Dynamic Button {i}"), id="root"
-                        )
-                        for i in range(10)
-                    ]
-                )
+            self.my_listbox.body.extend(
+                [
+                    self.layout.style_widget(
+                        urwid.Button(f"Dynamic Button {i}"), id="root"
+                    )
+                    for i in range(10)
+                ]
+            )
 
     manager = LayoutManager()
 

@@ -32,12 +32,20 @@ class LayoutResourceHandler(ResourceHandler):
         palettes=[],
         widgets: list[type[WidgetBuilder]] = [],
         css_variables: dict[str, str] = {},
+        data={},
     ):
         self.layout = layout
         self.palettes = palettes
         self.widgets = widgets
         self.css_variables = css_variables
-        self.data = {}
+        self.data = data
+
+    def bind_widgets(self):
+        for name, attr in self.__class__.__dict__.items():
+            widget_id = getattr(attr, "_widget_id", None)
+            if widget_id is not None:
+                widget = self.layout.get_widget_by_id(widget_id)
+                setattr(self, name, widget)
 
     def get_palettes(self):
         """Get custom palettes."""
@@ -167,6 +175,7 @@ class Layout:
         """Parse the XML and CSS. Make sure to call :meth:`register_widgets` first if neccessary."""
         self.css_parser = CSSParser(self.css_path, self.resources.get_css_variables())
         self.xml_parser = XMLParser(self.xml_path, self.resources, self.css_parser)
+        self.resources.bind_widgets()
         self.resources.on_load()
         return self
 

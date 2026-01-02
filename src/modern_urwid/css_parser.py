@@ -1,5 +1,4 @@
 from pathlib import Path
-from re import L
 from typing import Union
 
 import cssselect2
@@ -9,7 +8,6 @@ from tinycss2.ast import (
     FunctionBlock,
     HashToken,
     IdentToken,
-    LiteralToken,
     Node,
     WhitespaceToken,
 )
