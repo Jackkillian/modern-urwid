@@ -14,7 +14,7 @@ class StyleRegistry:
         self.matcher = Matcher()
         self.add_selectors(selectors)
         self.pseudo_map = pseudos if pseudos else {}
-        self.palettes = {}  # need to be registered after all stlyes aare applied
+        self.palettes = {}
 
     def get(
         self, element: "ElementWrapper", default: dict[str, str] = DEFAULT_STYLE

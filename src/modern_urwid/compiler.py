@@ -202,8 +202,7 @@ def compile_node(
     sizing = SizeOptions(wh_type, wh_amount)
 
     # children
-    child_class = str(node.get_meta_attr("child_class"))
-    if child_class:
+    if child_class := node.get_meta_attr("child_class"):
         child_class = f"{clazz} {child_class}"
     else:
         child_class = clazz

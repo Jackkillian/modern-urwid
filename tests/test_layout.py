@@ -23,7 +23,6 @@ def test_layout_loads():
     #     Path(importlib.resources.files("tests") / "resources" / "styles.css"),
     #     {"--my-var": "light gray"},
     # )
-
     # style_registry = StyleRegistry(selectors, pseudo_map)
     context = CompileContext(Path(importlib.resources.files("tests")), widget_registry)
 
