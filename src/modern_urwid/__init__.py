@@ -1,7 +1,7 @@
 from .compiler import parse_xml_layout
 from .constants import RESOURCE_CHAR, XML_NS
 from .context import CompileContext
-from .decorators import widget
+from .decorators import assign_widget
 from .exceptions import InvalidTemplate, UnknownModule
 from .lifecycle.controller import Controller
 from .lifecycle.manager import Manager
@@ -24,6 +24,6 @@ __all__ = [
     "StyleRegistry",
     "WidgetRegistry",
     "LayoutNode",
+    "assign_widget",
     "parse_xml_layout",
-    "widget",
 ]

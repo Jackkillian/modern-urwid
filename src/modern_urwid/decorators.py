@@ -3,7 +3,7 @@ from typing import Callable, TypeVar
 T = TypeVar("T")
 
 
-def widget(id: str) -> Callable[[Callable[..., T]], T]:
+def assign_widget(id: str) -> Callable[[Callable[..., T]], T]:
     """
     Bind a widget.
 

@@ -3,7 +3,6 @@ from pathlib import Path
 
 import urwid
 
-import modern_urwid
 from modern_urwid import CompileContext, WidgetBuilder, WidgetRegistry
 
 

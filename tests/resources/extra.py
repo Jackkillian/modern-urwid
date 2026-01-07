@@ -1,12 +1,11 @@
 import urwid
 
-import modern_urwid
-from modern_urwid import CompileContext, Controller, LayoutNode
+from modern_urwid import CompileContext, Controller, LayoutNode, assign_widget
 from tests.resources.widgets import CustomButton
 
 
 class MyController(Controller):
-    @modern_urwid.widget("dynamic_listbox")
+    @assign_widget("dynamic_listbox")
     def my_listbox(self) -> urwid.ListBox: ...
 
     def on_load(self):
