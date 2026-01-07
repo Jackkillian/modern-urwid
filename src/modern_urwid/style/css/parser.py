@@ -99,7 +99,7 @@ def split_decl(tokens):
 
 
 def parse_stylesheet(
-    path: Path, variables: dict[str, str] = {}
+    path: Path, variable_overrides: dict[str, str] = {}
 ) -> tuple[list[tuple], dict]:
     if not path.exists():
         raise FileNotFoundError(
@@ -110,6 +110,7 @@ def parse_stylesheet(
             f"Could not find stylesheet: {path.absolute()} is a directory"
         )
 
+    variables = variable_overrides.copy()
     rules: list[Node] = tinycss2.parse_stylesheet(
         path.read_text(),
         skip_comments=True,
