@@ -41,10 +41,6 @@ class Node:
 class MetaNode(Node):
     """
     Defined by mu namespace tags
-
-    - resources
-    - signal
-    - python
     """
 
     def __init__(
@@ -59,8 +55,7 @@ class MetaNode(Node):
         children: list[MetaNode] = [],
         parent: Union[Node, None] = None,
     ):
-        super().__init__(tag, None, attrs, meta_attrs, parent=parent)
-        self.children = children if children else []
+        super().__init__(tag, None, attrs, meta_attrs, children, parent=parent)
 
 
 class LayoutNode(Node):
@@ -78,6 +73,5 @@ class LayoutNode(Node):
         meta: list[MetaNode] = [],
         parent: Union[LayoutNode, None] = None,
     ):
-        super().__init__(tag, text, attrs, meta_attrs, parent=parent)
-        self.children = children if children else []
+        super().__init__(tag, text, attrs, meta_attrs, children, parent=parent)
         self.meta = meta if meta else []
