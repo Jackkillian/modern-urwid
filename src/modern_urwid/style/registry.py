@@ -12,8 +12,9 @@ if TYPE_CHECKING:
 class StyleRegistry:
     def __init__(self, selectors: list[tuple] = [], pseudos: dict = {}):
         self.matcher = Matcher()
-        self.add_selectors(selectors)
-        self.pseudo_map = pseudos if pseudos else {}
+        if selectors:
+            self.add_selectors(selectors)
+        self.pseudo_map = pseudos.copy()
         self.palettes = {}
 
     def get(
