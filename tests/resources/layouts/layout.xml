@@ -1,24 +1,44 @@
-<pile xmlns:mu="https://github.com/Jackkillian/modern-urwid" id="root">
+<pile xmlns:mu="https://github.com/Jackkillian/modern-urwid" mu:id="root">
     <mu:resources>
-        <mu:python module="tests.resources.user" as="user" />
-        <mu:python module="tests.resources.theme" />
-        <mu:python module="tests.resources.extra" />
+        <mu:python module="tests.resources.user" as="usr" />
+        <mu:python path="resources/extra.py" />
+        <mu:widget module="tests.resources.widgets" />
+        <mu:stylesheet path="resources/styles/styles.css">
+            <mu:var name="--my-var" value="light gray" />
+        </mu:stylesheet>
     </mu:resources>
-    <filler mu:height="1"><text
-            id="header_text"
-            class="custom"
-        >Hello, world</text></filler>
+    <mu:layout controller="@extra.MyController" />
+
+    <pile mu:height="3" mu:class="all-red">
+        <filler mu:height="1">
+            <text>Hello, world</text>
+        </filler>
+        <filler mu:height="1" mu:class="blue">
+            <text>Hello, world</text>
+        </filler>
+        <filler mu:height="1"><text
+                mu:id="header_text"
+                mu:class="custom"
+            >Hello, world</text></filler>
+    </pile>
     <filler mu:height="1">
         <text
-            markup="Current user: {user.current_user.name}; ID: {user.current_user.id}"
+            mu:class="dark-blue"
+            markup="Current user: {usr.current_user.name}; ID: {usr.current_user.id}"
         />
     </filler>
     <filler mu:height="1"><edit caption="Edit: ">
-        <mu:signal name="change" callback="@on_edit_change" />
-        <mu:signal name="postchange" callback="@on_edit_postchange" />
+        <mu:signal
+                name="change"
+                callback="@extra.MyController.on_edit_change"
+            />
+        <mu:signal
+                name="postchange"
+                callback="@extra.MyController.on_edit_postchange"
+            />
     </edit></filler>
     <filler mu:height="1"><button
-            on_press="@quit_callback"
+            on_press="@extra.MyController.quit_callback"
         >Quit</button></filler>
     <solidfill mu:height="3">.</solidfill>
     <filler mu:height="2"><divider /></filler>
@@ -27,10 +47,10 @@
             complete="pb_full"
             current="57"
         /></filler>
-    <filler valign="top" class="dark"><text
+    <filler valign="top" mu:class="dark"><text
         >This should look different</text></filler>
     <padding mu:height="2" left="5" right="2"><filler><text
-                id="padded"
+                mu:id="padded"
             >Left should be 5; right should be 2</text></filler></padding>
     <filler mu:height="3">
         <gridflow
@@ -54,17 +74,12 @@
     <filler valign="middle"><text
         >This should inherit the pile style</text></filler>
     <columns mu:height="1">
-        <filler mu:weight="75"><text class="col1">Col 1</text></filler>
-        <filler mu:weight="25"><text class="col2">Col 2</text></filler>
+        <filler mu:weight="75"><text mu:class="col1">Col 1</text></filler>
+        <filler mu:weight="25"><text mu:class="col2">Col 2</text></filler>
     </columns>
     <customwidgetfromxml mu:height="1" />
     <scrollbar>
-        <listbox id="dynamic_listbox" />
+        <listbox mu:id="dynamic_listbox" />
     </scrollbar>
-    <mu:layout
-        xml_path="layout2.xml"
-        css_path="layout2.css"
-        resources="@Layout2Resources"
-    />
     <customwidget />
 </pile>

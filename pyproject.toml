@@ -30,6 +30,7 @@ dependencies = [
   "lxml",
   "types-lxml",
   "dict_hash",
+  "typing-extensions",
 ]
 
 [project.urls]

@@ -4,76 +4,46 @@ from pathlib import Path
 import urwid
 
 import modern_urwid
-from modern_urwid import Layout, LayoutManager, LayoutResourceHandler, WidgetBuilder
+from modern_urwid import CompileContext, WidgetBuilder, WidgetRegistry
 
 
 def test_layout_loads():
-    class CustomResources2(LayoutResourceHandler):
-        pass
+    widget_registry = WidgetRegistry()
 
-    class CustomResources(LayoutResourceHandler):
-        @modern_urwid.widget("dynamic_listbox")
-        def my_listbox(self) -> urwid.ListBox: ...
-
-        def __init__(self, layout):
-            self.Layout2Resources = CustomResources2(layout)
-            super().__init__(
-                layout,
-                palettes=[
-                    ("pb_empty", "white", "black"),
-                    ("pb_full", "black", "light blue"),
-                ],
-                css_variables={"--my-var": "light gray"},
-            )
-
-        def quit_callback(self, w):
-            raise urwid.ExitMainLoop()
-
-        def on_edit_change(self, w: urwid.Edit, full_text):
-            w.set_caption(f"Edit ({full_text}): ")
-
-        def on_edit_postchange(self, w, text):
-            widget = self.layout.get_widget_by_id("header_text")
-            if isinstance(widget, urwid.Text):
-                widget.set_text(text)
-
-        def on_load(self):
-            self.my_listbox.body.extend(
-                [
-                    self.layout.style_widget(
-                        urwid.Button(f"Dynamic Button {i}"), id="root"
-                    )
-                    for i in range(10)
-                ]
-            )
-
-    manager = LayoutManager()
-
-    @manager.register_widget()
+    @widget_registry.register()
     class CustomWidget(WidgetBuilder):
-        def build(self, **kwargs):
-            return urwid.Filler(urwid.Text("This is a custom widget!"))
+        tag = "customwidget"
 
-    @manager.register_widget()
-    class CustomWidgetFromXML(WidgetBuilder):
         def build(self, **kwargs):
-            parser = self.render_from_xml(
-                Path(importlib.resources.files("tests") / "resources" / "widget.xml"),
-                css_path=Path(
-                    importlib.resources.files("tests") / "resources" / "widget.css"
-                ),
+            return urwid.Filler(
+                urwid.Text(f"This is a custom widget with tag <{self.node.tag}>")
             )
-            manager.register_palette(parser.get_palettes())
-            return parser.get_root()
 
-    manager.register(
-        "layout",
-        layout := Layout(
-            Path(importlib.resources.files("tests") / "resources" / "layout.xml"),
-            Path(importlib.resources.files("tests") / "resources" / "styles.css"),
-            CustomResources,
-        ),
+    # selectors, pseudo_map = parse_stylesheet(
+    #     Path(importlib.resources.files("tests") / "resources" / "styles.css"),
+    #     {"--my-var": "light gray"},
+    # )
+
+    # style_registry = StyleRegistry(selectors, pseudo_map)
+    context = CompileContext(Path(importlib.resources.files("tests")), widget_registry)
+
+    loop = urwid.MainLoop(
+        urwid.Text(""),
+        palette=[
+            ("pb_empty", "white", "black"),
+            ("pb_full", "black", "light blue"),
+        ],
     )
+    loop.screen.set_terminal_properties(2**24)
+
+    manager = modern_urwid.Manager(context, loop)
+    manager.register("main", "resources/layouts/layout.xml")
+    manager.run("main")
+
+    # loop.run()
+    # loop.screen.clear()
+    # loop.draw_screen()
+    return
 
     assert isinstance(layout.get_root(), urwid.AttrMap)
     assert isinstance(layout.get_root().base_widget, urwid.Pile)

@@ -1,10 +1,23 @@
 :root {
     --default-color: dark green;
-    --my-var: light red;
+    --my-var: dark red;
 }
 
 edit {
     color: var(--default-color);
+}
+
+.all-red {
+    color: light red;
+    background: dark red;
+}
+
+.blue {
+    color: light blue;
+}
+
+.dark-blue {
+    color: dark blue;
 }
 
 #root {
@@ -54,16 +67,32 @@ button {
 
 button:focus {
     color: light red;
+    color-adv: #ff88dd;
 }
 
 scrollbar,
 /*text:focus:hover,*/
 #texthover {
     color: light blue;
+    color-adv: #00eeff;
+}
+
+.custom-class {
+    color: light blue;
+}
+
+.custom-class-bg {
+    background: dark red;
+}
+
+.custom-class:focus {
+    color-adv: #0088dd;
+    background-adv: #000a2b;
 }
 
 scrollbar:focus {
     color: black;
+    color-adv: #222;
 }
 
 text.my_class {
