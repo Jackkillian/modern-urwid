@@ -37,21 +37,13 @@ def test_layout_loads():
 
     manager = modern_urwid.Manager(context, loop)
     manager.register("main", "resources/layouts/layout.xml")
+
+    assert "main" in manager.layouts
+    assert "main" in manager.controllers
+    assert isinstance(manager.layouts["main"], urwid.AttrMap)
+    assert isinstance(manager.layouts["main"].base_widget, urwid.Pile)
+
     manager.run("main")
-
-    # loop.run()
-    # loop.screen.clear()
-    # loop.draw_screen()
-    return
-
-    assert isinstance(layout.get_root(), urwid.AttrMap)
-    assert isinstance(layout.get_root().base_widget, urwid.Pile)
-
-    screen: urwid.display.raw.Screen = manager.get_loop().screen
-    screen.set_terminal_properties(2**24)
-
-    manager.switch("layout")
-    manager.run()
 
     # loop.start()
     # loop.screen.clear()
