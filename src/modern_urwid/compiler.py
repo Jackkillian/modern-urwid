@@ -162,7 +162,7 @@ def compile_node(
         if callable(callback := resolve_resource(ctx.module_registry, resource)):
             urwid.connect_signal(widget, name, wrap_callback(callback, node, ctx))
         else:
-            TypeError(f"Resource at {resource} is not callable.")
+            raise TypeError(f"Resource at {resource} is not callable.")
 
     # style
     if not isinstance(id := node.meta_attrs.get("id"), str):
