@@ -3,7 +3,7 @@ from pathlib import Path
 
 import urwid
 
-from modern_urwid import CompileContext, WidgetBuilder, WidgetRegistry
+from modern_urwid import CompileContext, Manager, WidgetBuilder, WidgetRegistry
 
 
 def test_layout_loads():
@@ -34,7 +34,7 @@ def test_layout_loads():
     )
     loop.screen.set_terminal_properties(2**24)
 
-    manager = modern_urwid.Manager(context, loop)
+    manager = Manager(context, loop)
     manager.register("main", "resources/layouts/layout.xml")
 
     assert "main" in manager.layouts
