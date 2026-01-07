@@ -11,4 +11,4 @@ class UnresolvedTemplate:
         self.value = template
 
     def __repr__(self) -> str:
-        return f"<UnresolvedTemplate path={self.value}>"
+        return f"<UnresolvedTemplate value={self.value}>"
