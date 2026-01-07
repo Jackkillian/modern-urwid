@@ -47,13 +47,13 @@ class Manager:
                     self.context.module_registry, layout_config["controller"], False
                 )
             ) and issubclass(controller_cls, Controller):
-                controller = controller_cls(self.context)
+                controller = controller_cls(self, self.context)
             else:
                 raise TypeError(
                     f"Provided resource for controller ({controller_cls}) does not extend the Controller class"
                 )
         else:
-            controller = Controller(self.context)
+            controller = Controller(self, self.context)
             if "on_load" in layout_config:
                 if callable(
                     resource := resolve_resource(

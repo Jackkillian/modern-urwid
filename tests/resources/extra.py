@@ -10,8 +10,6 @@ class MyController(Controller):
 
     def on_load(self):
         # my_listbox = self.context.get_widget_by_id("dynamic_listbox")
-
-        # TODO: dynamically make widgets from xml?
         self.my_listbox.body.extend(
             [
                 self.make_widget_from_builder(
@@ -22,6 +20,10 @@ class MyController(Controller):
                 for i in range(10)
             ]
         )
+
+    # TODO: this doesnt need to be wrapped with ctx...
+    def switch_controller(self, node: LayoutNode, ctx: CompileContext, w: urwid.Button):
+        self.manager.switch("second")
 
     def on_edit_change(
         self, node: LayoutNode, ctx: CompileContext, w: urwid.Edit, full_text
@@ -35,3 +37,15 @@ class MyController(Controller):
 
     def quit_callback(self, node: LayoutNode, ctx: CompileContext, w):
         raise urwid.ExitMainLoop()
+
+
+class SecondController(Controller):
+    # TODO: controllers use the same context, so any tags with the same id get overwritten
+    @assign_widget("overwrite")
+    def text(self) -> urwid.Text: ...
+
+    def on_load(self):
+        self.text.set_text("Welcome to modern-urwid")
+
+    def switch_controller(self, node: LayoutNode, ctx: CompileContext, w: urwid.Button):
+        self.manager.switch("main")

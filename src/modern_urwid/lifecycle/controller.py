@@ -6,16 +6,23 @@ from modern_urwid.style.css.wrapper import create_wrapper
 
 if TYPE_CHECKING:
     from modern_urwid.context import CompileContext
+    from modern_urwid.lifecycle.manager import Manager
     from modern_urwid.widgets.builder import WidgetBuilder
 
 
 class Controller(object):
     _state = {}
 
-    def __init__(self, context: Union["CompileContext", None] = None):
+    def __init__(
+        self,
+        manager: Union["Manager", None] = None,
+        context: Union["CompileContext", None] = None,
+    ):
         self.__dict__ = self._state
         if context is not None:
             self.context = context
+        if manager is not None:
+            self.manager = manager
 
     def make_widget_from_builder(
         self,

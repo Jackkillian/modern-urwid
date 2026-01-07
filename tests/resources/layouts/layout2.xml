@@ -1,9 +1,26 @@
-<linebox xmlns:mu="https://github.com/Jackkillian/modern-urwid" id="root">
+<linebox
+    xmlns:mu="https://github.com/Jackkillian/modern-urwid"
+    mu:selectable="True"
+>
+    <mu:resources>
+        <mu:python path="resources/extra.py" />
+        <mu:widget module="tests.resources.widgets" />
+        <mu:stylesheet path="resources/styles/styles.css">
+            <mu:var name="--my-var" value="light gray" />
+        </mu:stylesheet>
+    </mu:resources>
+    <mu:layout controller="@extra.SecondController" />
     <pile>
         <filler mu:height="1">
             <text>Custom Layout</text>
         </filler>
-        <filler class="inverted"><text>More text</text></filler>
+        <filler mu:class="inverted"><text
+                mu:id="overwrite"
+            >You should see this text</text></filler>
         <customwidget />
+        <filler mu:height="1"><button>this does nothing</button></filler>
+        <filler mu:height="1"><button
+                on_press="@extra.SecondController.switch_controller"
+            >Switch layout</button></filler>
     </pile>
 </linebox>

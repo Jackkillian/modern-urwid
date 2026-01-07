@@ -38,6 +38,9 @@
             />
     </edit></filler>
     <filler mu:height="1"><button
+            on_press="@extra.MyController.switch_controller"
+        >Switch layout</button></filler>
+    <filler mu:height="1"><button
             on_press="@extra.MyController.quit_callback"
         >Quit</button></filler>
     <solidfill mu:height="3">.</solidfill>

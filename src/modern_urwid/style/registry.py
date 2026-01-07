@@ -43,7 +43,7 @@ class StyleRegistry:
         if normal_hash not in self.palettes:
             self.palettes[normal_hash] = style
 
-        focus_hash = None
+        focus_hash = normal_hash
         if (
             "focus" in pseudos
             and (focus_hash := md5(pseudos["focus"])) not in self.palettes

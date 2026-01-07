@@ -103,6 +103,7 @@ def compile_node(
 
     # parse meta
     meta = compile_meta_nodes(node.meta)
+
     for tag in meta.get("resources").get("python", []):
         if file_path := tag.get("path"):
             file_path = ctx.resolve_path(file_path)
@@ -209,6 +210,18 @@ def compile_node(
     children = [compile_node(child, ctx, style, child_class) for child in node.children]
     if children:
         builder.attach_children(widget, children)
+
+    # handle mu:selectable override
+    if isinstance(selectable := node.meta_attrs.get("selectable"), bool):
+        widget._selectable = selectable
+
+        # TODO: extremely hacky
+        if isinstance(widget, (urwid.LineBox)):
+            setattr(
+                widget,
+                "keypress",
+                lambda size, key: children[0][0].keypress(size, key),
+            )
 
     # apply style map
     widget = urwid.AttrMap(widget, hash, focus_hash)
