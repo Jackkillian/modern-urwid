@@ -8,7 +8,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 # -- Project information
 
 project = "modern-urwid"
-copyright = "2025, Jack Freund"
+copyright = "2026, Jack Freund"
 author = "Jack Freund"
 
 release = pkg_version("modern-urwid")
