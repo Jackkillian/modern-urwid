@@ -169,9 +169,9 @@ def compile_node(
     if not isinstance(id := node.meta_attrs.get("id"), str):
         id = None
     else:
-        if id in ctx.mapped_widgets:
+        if id in ctx.get_local().mapped_widgets:
             raise ValueError(f"Cannot duplicate IDs: {id}")
-        ctx.mapped_widgets[id] = widget
+        ctx.get_local().mapped_widgets[id] = widget
 
     if not isinstance(clazz := node.meta_attrs.get("class"), str):
         clazz = child_class
@@ -230,8 +230,14 @@ def compile_node(
 
 
 def parse_xml_layout(
-    file_path: Union[Path, str], context: "CompileContext"
+    file_path: Union[Path, str],
+    context: "CompileContext",
+    name: Union[str, None] = None,
 ) -> tuple[urwid.Widget, Metadata]:
+    if name is None:
+        name = Path(file_path).stem
+    context.add_local(name)
+
     root = etree.parse(file_path).getroot()
     node = parse_element(root)
     if not isinstance(node, LayoutNode):

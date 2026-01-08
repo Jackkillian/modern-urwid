@@ -5,6 +5,8 @@ from tests.resources.widgets import CustomButton
 
 
 class MyController(Controller):
+    name = "main"
+
     @assign_widget("dynamic_listbox")
     def my_listbox(self) -> urwid.ListBox: ...
 
@@ -23,7 +25,7 @@ class MyController(Controller):
 
     # TODO: this doesnt need to be wrapped with ctx...
     def switch_controller(self, node: LayoutNode, ctx: CompileContext, w: urwid.Button):
-        self.manager.switch("second")
+        self.manager.switch("layout2")
 
     def on_edit_change(
         self, node: LayoutNode, ctx: CompileContext, w: urwid.Edit, full_text
@@ -31,7 +33,7 @@ class MyController(Controller):
         w.set_caption(f"Edit ({full_text}): ")
 
     def on_edit_postchange(self, node: LayoutNode, ctx: CompileContext, w, text):
-        widget = ctx.get_widget_by_id("header_text")
+        widget = self.local_data.get_widget_by_id("header_text")
         if isinstance(widget, urwid.Text):
             widget.set_text(text)
 
@@ -40,6 +42,8 @@ class MyController(Controller):
 
 
 class SecondController(Controller):
+    name = "layout2"
+
     # TODO: controllers use the same context, so any tags with the same id get overwritten
     @assign_widget("overwrite")
     def text(self) -> urwid.Text: ...

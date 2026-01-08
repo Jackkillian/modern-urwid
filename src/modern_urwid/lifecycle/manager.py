@@ -1,4 +1,5 @@
 import inspect
+from pathlib import Path
 from typing import TYPE_CHECKING, Union
 
 import urwid
@@ -10,15 +11,12 @@ from modern_urwid.resource.dummies import UnresolvedResource
 from modern_urwid.resource.utils import resolve_resource, wrap_callback
 
 if TYPE_CHECKING:
-    from pathlib import Path
-
     from modern_urwid.context import CompileContext
 
 
 class Manager:
     """
-    Manages multiple layouts and shared custom widgets and palettes
-    between them.
+    Manages multiple layouts and shared resources between them.
     """
 
     def __init__(
@@ -33,12 +31,14 @@ class Manager:
         self.current: Union[str, None] = None
         self.context = context
 
-    def register(self, name: str, layout_path: Union[str, "Path"]):
+    def register(self, layout_path: Union[str, Path], key: Union[str, None] = None):
         """Register a new layout"""
+        if key is None:
+            key = Path(layout_path).stem
+
         node, meta = parse_xml_layout(
-            self.context.resolve_path(layout_path), self.context
+            self.context.resolve_path(layout_path), self.context, key
         )
-        self.layouts[name] = node
 
         layout_config = meta.get("layout")
         if "controller" in layout_config:
@@ -48,12 +48,20 @@ class Manager:
                 )
             ) and issubclass(controller_cls, Controller):
                 controller = controller_cls(self, self.context)
+                if controller.name is None:
+                    raise ValueError(f"{controller_cls.__name__}.name can not be None")
+                elif controller.name != key:
+                    raise ValueError(
+                        f"{controller_cls.__name__}.name must be the same as the provided name: '{key}'"
+                    )
+                name = controller.name
             else:
                 raise TypeError(
-                    f"Provided resource for controller ({controller_cls}) does not extend the Controller class"
+                    f"Provided resource for controller ({controller_cls.__name__}) does not extend the Controller class"
                 )
         else:
             controller = Controller(self, self.context)
+            controller.name = key
             if "on_load" in layout_config:
                 if callable(
                     resource := resolve_resource(
@@ -79,11 +87,12 @@ class Manager:
                 ):
                     controller.on_exit = wrap_callback(resource, self.context)
 
+        self.layouts[name] = node
         self.controllers[name] = controller
         for name, attr in controller.__class__.__dict__.items():
             widget_id = getattr(attr, "_widget_id", None)
             if widget_id is not None:
-                widget = self.context.get_widget_by_id(widget_id)
+                widget = self.context.get_local().get_widget_by_id(widget_id)
                 setattr(controller, name, widget)
         controller.on_load()
 

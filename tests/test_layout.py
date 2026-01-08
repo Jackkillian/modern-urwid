@@ -35,8 +35,8 @@ def test_layout_loads():
     loop.screen.set_terminal_properties(2**24)
 
     manager = Manager(context, loop)
-    manager.register("main", "resources/layouts/layout.xml")
-    manager.register("second", "resources/layouts/layout2.xml")
+    manager.register("resources/layouts/layout.xml", "main")
+    manager.register("resources/layouts/layout2.xml")
 
     assert "main" in manager.layouts
     assert "main" in manager.controllers
