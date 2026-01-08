@@ -18,13 +18,13 @@ class WidgetBuilder:
     """
     Used to create urwid widgets from the AST nodes.
     Subclasses should define the following methods:
-        - ``build``
-        - ``attach_children`` (if the widget has children)
-        - ``after_build`` (if extra modification is needed)
+    - ``build``
+    - ``attach_children`` (if the widget has children)
+    - ``after_build`` (if extra modification is needed)
 
     The following attributes can be used if applicable:
-        - ``node``: :class:`~modern_urwid.xml.ast.LayoutNode`
-        - ``context``: :class:`~modern_urwid.context.CompileContext`
+    - ``node``: :class:`~modern_urwid.xml.ast.LayoutNode`
+    - ``context``: :class:`~modern_urwid.context.CompileContext`
     """
 
     tag: Union[str, None] = None

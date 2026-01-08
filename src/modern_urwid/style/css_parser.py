@@ -1,6 +1,12 @@
+"""
+Utilities to parse CSS rules
+"""
+
 from pathlib import Path
+from typing import Union
 
 import cssselect2
+import lxml.etree
 import tinycss2
 from tinycss2.ast import (
     Declaration,
@@ -10,6 +16,28 @@ from tinycss2.ast import (
     Node,
     WhitespaceToken,
 )
+
+
+def create_wrapper(
+    tag: str, id: Union[str, None] = None, classes: Union[str, None] = None
+) -> cssselect2.ElementWrapper:
+    """Create a wrapper for styling
+
+    :param tag: The tag for the element
+    :type tag: str
+    :param id: The ID for the element
+    :type id: str, optional
+    :param classes: The classes for the element
+    :type classes: str, optional
+    :return: An element wrapper made from the provided settings
+    :rtype: cssselect2.ElementWrapper
+    """
+    element = lxml.etree.Element(tag)
+    if id:
+        element.set("id", id)
+    if classes:
+        element.set("class", classes)
+    return cssselect2.ElementWrapper.from_xml_root(element)
 
 
 def pop_pseudos_from_tokens(tokens):
@@ -71,13 +99,10 @@ def get_props(tokens, variables):
 
 
 def get_tokens_value(tokens: list[Node]) -> str:
-    value = ""
-    for token in tokens:
-        value += token.serialize()
-    return value
+    return "".join([token.serialize() for token in tokens])
 
 
-def split_decl(tokens):
+def split_decl(tokens: list[Node]) -> list[tuple[IdentToken, list[Node]]]:
     result = []
     name = []
     value = []

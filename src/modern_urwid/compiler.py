@@ -10,8 +10,7 @@ from typing_extensions import TypedDict
 from .constants import DEFAULT_STYLE
 from .resource.dummies import UnresolvedResource
 from .resource.utils import import_module, resolve_resource, wrap_callback
-from .style.css.parser import parse_stylesheet
-from .style.css.wrapper import create_wrapper
+from .style.css_parser import create_wrapper, parse_stylesheet
 from .widgets.builder import WidgetBuilder
 from .widgets.size_options import SizeOptions
 from .xml.ast import LayoutNode, MetaNode

@@ -74,5 +74,7 @@ class CompileContext:
         self.custom_data[key] = value
 
     def get_custom(self, key: str, default: Any = None):
-        """Get a custom data value"""
+        """Get a custom data value
+        
+        """
         return self.custom_data.get(key, default)

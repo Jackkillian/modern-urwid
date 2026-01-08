@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING, Union
 
 import urwid
 
-from modern_urwid.style.css.wrapper import create_wrapper
+from modern_urwid.style.css_parser import create_wrapper
 
 if TYPE_CHECKING:
     from modern_urwid.context import CompileContext

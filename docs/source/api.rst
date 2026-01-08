@@ -35,7 +35,7 @@ Style
     :toctree: generated/
     :recursive:
 
-    modern_urwid.style.css
+    modern_urwid.style.css_parser
     modern_urwid.style.registry
 
 Widgets
