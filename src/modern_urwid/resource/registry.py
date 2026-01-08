@@ -21,7 +21,7 @@ class ModuleRegistry:
         :param name: The name of the module
         :type name: str
         :param module: The Python module to register
-        :type module: ModuleType
+        :type module: types.ModuleType
         """
         self.modules[name] = module
 
@@ -32,7 +32,7 @@ class ModuleRegistry:
         :type name: str
         :raises UnknownModule: Raises if a module is not found with the given name
         :return: The Python module, if registered
-        :rtype: ModuleType
+        :rtype: types.ModuleType
         """
         if module := self.modules.get(name):
             return module

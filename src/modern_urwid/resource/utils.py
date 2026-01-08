@@ -20,10 +20,10 @@ def wrap_callback(callback: Callable, *args) -> Callable:
     """Wrap a callback with the given arguments
 
     :param callback: The callback to wrap
-    :type callback: Callable
+    :type callback: typing.Callable
     :return: Lambda that will call the original callback with
         the given arguments and any additional arguments at call time
-    :rtype: Callable
+    :rtype: typing.Callable
     """
     return lambda *_args, **_kwargs: callback(*args, *_args, **_kwargs)
 
@@ -42,7 +42,7 @@ def resolve_resource(
     :param resolve_controllers: Whether or not to instance controller classes
     :type resolve_controllers: bool
     :return: A resolved resource provided by a module
-    :rtype: Any
+    :rtype: typing.Any
     """
     path = unresolved.path
     if path.startswith("@"):
@@ -85,7 +85,7 @@ def import_module(
     :param file_path: A file path to the module, defaults to ``None``
     :type file_path: str, optional
     :return: A tuple containing the python module and its name, or ``None`` if it could not be resolved
-    :rtype: tuple[str, ModuleType] | None
+    :rtype: tuple[str, types.ModuleType] | None
     """
     if module_path:
         name = module_path.split(".")[-1]

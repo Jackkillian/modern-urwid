@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 class Controller(object):
     """
-    Utility class to handle lifecycle hooks
+    Utility class to handle lifecycle hooks and extra UI logic
     """
 
     _state = {}

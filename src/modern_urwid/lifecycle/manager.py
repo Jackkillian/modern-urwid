@@ -32,7 +32,15 @@ class Manager:
         self.context = context
 
     def register(self, layout_path: Union[str, Path], key: Union[str, None] = None):
-        """Register a new layout"""
+        """Register a  new layout
+
+        :param layout_path: Layout name to switch to
+        :type layout_path: str | pathlib.Path
+        :param key: The key to register the layout under
+        :type key: str, optional
+        :raises ValueError: Raises if an incorrect key value is found
+        :raises TypeError: Raises if the provided controller does not extend :class:`~modern_urwid.lifecycle.controller.Controller`
+        """
         if key is None:
             key = Path(layout_path).stem
 
@@ -105,6 +113,10 @@ class Manager:
 
         Calls the new controller's :meth:`~modern_urwid.lifecycle.Controller.on_enter` method, and the
         old controller's :meth:`~modern_urwid.lifecycle.Controller.on_exit` method.
+
+        :param name: Layout name to switch to
+        :type name: str
+        :raises LayoutNotFound: Raises if a layout is not found with the given name
         """
 
         if name not in self.layouts:
@@ -119,6 +131,11 @@ class Manager:
         self.current = name
 
     def run(self, name: Union[str, None] = None):
+        """Run the MainLoop
+
+        :param name: If provided, switch to this layout before running
+        :type name: str, optional
+        """
         if name:
             self.switch(name)
 
@@ -128,4 +145,9 @@ class Manager:
         self.loop.run()
 
     def get_loop(self) -> urwid.MainLoop:
+        """Get this manager's mainloop
+
+        :return: The mainloop this manager uses
+        :rtype: urwid.MainLoop
+        """
         return self.loop
