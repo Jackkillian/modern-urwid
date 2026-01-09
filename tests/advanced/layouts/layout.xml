@@ -1,0 +1,88 @@
+<pile xmlns:mu="https://github.com/Jackkillian/modern-urwid" mu:id="root">
+    <mu:resources>
+        <mu:python module="tests.advanced.user" as="usr" />
+        <mu:python path="extra.py" />
+        <mu:widget module="tests.advanced.widgets" />
+        <mu:stylesheet path="styles/styles.css">
+            <mu:var name="--my-var" value="light gray" />
+        </mu:stylesheet>
+    </mu:resources>
+    <mu:layout controller="@extra.MyController" />
+
+    <pile mu:height="3" mu:class="all-red">
+        <filler mu:height="1">
+            <text>Hello, world</text>
+        </filler>
+        <filler mu:height="1" mu:class="blue">
+            <text>Hello, world</text>
+        </filler>
+        <filler mu:height="1"><text
+                mu:id="header_text"
+                mu:class="custom"
+            >Hello, world</text></filler>
+    </pile>
+    <filler mu:height="1">
+        <text
+            mu:class="dark-blue"
+            markup="Current user: {usr.current_user.name}; ID: {usr.current_user.id}"
+        />
+    </filler>
+    <filler mu:height="1"><edit caption="Edit: ">
+        <mu:signal
+                name="change"
+                callback="@extra.MyController.on_edit_change"
+            />
+        <mu:signal
+                name="postchange"
+                callback="@extra.MyController.on_edit_postchange"
+            />
+    </edit></filler>
+    <filler mu:height="1"><button
+            on_press="@extra.MyController.switch_controller"
+        >Switch layout</button></filler>
+    <filler mu:height="1"><button
+            on_press="@extra.MyController.quit_callback"
+        >Quit</button></filler>
+    <solidfill mu:height="3">.</solidfill>
+    <filler mu:height="2"><divider /></filler>
+    <filler mu:height="1"><progressbar
+            normal="pb_empty"
+            complete="pb_full"
+            current="57"
+        /></filler>
+    <filler valign="top" mu:class="dark"><text
+        >This should look different</text></filler>
+    <padding mu:height="2" left="5" right="2"><filler><text
+                mu:id="padded"
+            >Left should be 5; right should be 2</text></filler></padding>
+    <filler mu:height="3">
+        <gridflow
+            cell_width="8"
+            h_sep="20"
+            v_sep="1"
+            align="center"
+            mu:child_class="flow"
+        >
+            <text markup="Text 1" align="center" />
+            <text markup="Text 2" align="center" />
+            <text markup="Text 3" align="center" />
+            <text markup="Text 4" align="center" />
+            <text markup="Text 5" align="center" />
+            <text markup="Text 6" align="center" />
+            <text markup="Text 7" align="center" />
+            <text markup="Text 8" align="center" />
+            <text markup="Text 9" align="center" />
+        </gridflow>
+    </filler>
+    <filler valign="middle"><text
+        >This should inherit the pile style</text></filler>
+    <columns mu:height="1">
+        <filler mu:weight="75"><text mu:class="col1">Col 1</text></filler>
+        <filler mu:weight="25"><text mu:class="col2">Col 2</text></filler>
+    </columns>
+    <customwidgetfromxml mu:height="1" />
+    <scrollbar>
+        <listbox mu:id="dynamic_listbox" />
+    </scrollbar>
+    <customwidget />
+</pile>

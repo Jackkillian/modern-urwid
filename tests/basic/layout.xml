@@ -1,0 +1,21 @@
+<pile xmlns:mu="https://github.com/Jackkillian/modern-urwid" mu:id="root">
+    <mu:resources>
+        <mu:python module="tests.basic" />
+        <mu:stylesheet path="styles.css" />
+    </mu:resources>
+    <mu:layout on_load="@basic.on_load" />
+    <filler mu:height="1" mu:class="header">
+        <text>Hello, world</text>
+    </filler>
+    <filler mu:height="1">
+        <edit caption="Edit: ">
+            <mu:signal name="change" callback="@basic.on_edit_change" />
+        </edit>
+    </filler>
+    <filler mu:height="1"><button
+            on_press="@basic.quit_callback"
+        >Quit</button></filler>
+    <scrollbar>
+        <listbox mu:id="dynamic_listbox" />
+    </scrollbar>
+</pile>
