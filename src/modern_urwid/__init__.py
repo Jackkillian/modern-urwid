@@ -4,7 +4,7 @@ from .context import CompileContext
 from .decorators import assign_widget
 from .exceptions import InvalidTemplate, UnknownModule
 from .lifecycle.controller import Controller
-from .lifecycle.manager import Manager
+from .lifecycle.manager import LifecycleManager
 from .resource.registry import ModuleRegistry
 from .style.registry import StyleRegistry
 from .widgets.builder import WidgetBuilder
@@ -15,7 +15,7 @@ __all__ = [
     "XML_NS",
     "RESOURCE_CHAR",
     "Controller",
-    "Manager",
+    "LifecycleManager",
     "WidgetBuilder",
     "UnknownModule",
     "InvalidTemplate",

@@ -3,13 +3,13 @@ from pathlib import Path
 
 import urwid
 
-from modern_urwid import CompileContext, Manager, WidgetBuilder, WidgetRegistry
+from modern_urwid import CompileContext, LifecycleManager, WidgetBuilder
 
 
 def test_layout_loads():
-    widget_registry = WidgetRegistry()
+    context = CompileContext(Path(importlib.resources.files("tests.advanced")))
 
-    @widget_registry.register()
+    @context.widget_registry.register()
     class CustomWidget(WidgetBuilder):
         tag = "customwidget"
 
@@ -23,7 +23,6 @@ def test_layout_loads():
     #     {"--my-var": "light gray"},
     # )
     # style_registry = StyleRegistry(selectors, pseudo_map)
-    context = CompileContext(Path(importlib.resources.files("tests")), widget_registry)
 
     loop = urwid.MainLoop(
         urwid.Text(""),
@@ -34,9 +33,9 @@ def test_layout_loads():
     )
     loop.screen.set_terminal_properties(2**24)
 
-    manager = Manager(context, loop)
-    manager.register("resources/layouts/layout.xml", "main")
-    manager.register("resources/layouts/layout2.xml")
+    manager = LifecycleManager(context, loop)
+    manager.register("layouts/layout.xml", "main")
+    manager.register("layouts/layout2.xml")
 
     assert "main" in manager.layouts
     assert "main" in manager.controllers

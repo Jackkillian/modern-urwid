@@ -80,7 +80,7 @@ def import_module(
 ) -> Union[tuple[str, ModuleType], None]:
     """Import a Python module from a given module or file path
 
-    :param module_path: A Python module path (e.g. ``tests.resources.extra``), defualts to ``None``
+    :param module_path: A Python module path (e.g. ``tests.advanced.extra``), defualts to ``None``
     :type module_path: str, optional
     :param file_path: A file path to the module, defaults to ``None``
     :type file_path: str, optional

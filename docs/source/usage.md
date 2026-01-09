@@ -1,179 +1,141 @@
 # Usage
 
-## Basic XML/CSS Rendering with Layout and LayoutManager
-The `LayoutManager` class is used to manager layouts, custom widgets, and styles/palettes:
+## Basic XML/CSS Rendering with CompileContext and LifecycleManager
+The `CompileContext` class is used to manage resources for controllers, including custom widgets, and styles/palettes:
 ```python
-manager = LayoutManager()
+context = CompileContext("/path/to/base/dir")
 ```
 
-Layouts with XML and CSS are created with the `Layout` class:
+A `LifecycleManager` is used to load layouts and switch between them:
 ```python
-layout = Layout(
-    Path("path/to/layout.xml"), # paths must be pathlib.Path
-    Path("path/to/stylesheet.css"),
-    CustomResources, # pass custom resources by class type (this can also be None)
+manager = LifecycleManager(context)
+```
+
+Then, layouts with XML and CSS can be created from a file path:
+```python
+manager.register(
+    "resources/layouts/layout.xml", # this will be resolved under the base path provided to CompileContext
+    "main" # name of the layout/controller
 )
 ```
 
+XML is used to create layouts. Note that attributes are passed as keyword arguments to urwid widgets. If an attribute's value starts with `@`, it will be treated as a resource and will be resolved from any loaded modules. String templates can also be used in a similar way by wrapping a value with brackets (`{}`).
+Attributes in the MU namespace will be treated specially:
+- `mu:id` - The ID of the widget. Used for styling and widget binding.
+- `mu:class` - Any classes to apply to the widget. Used for styling.
+- `mu:height` - Specify the height (or width in a horizontal container) of a widget.
+- `mu:weight` - Specify the weight of a widget in its container. Overrides `mu:height`.
+- `mu:pack` - Pack the widget in its container. Overrides `mu:weight`.
+
 XML:
 ```xml
-<pile xmlns:mu="https://github.com/Jackkillian/modern-urwid" id="root">
-    <filler mu:height="1">
-        <text id="header_text" class="custom">Hello, world</text>
+<pile xmlns:mu="https://github.com/Jackkillian/modern-urwid" mu:id="root">
+    <mu:resources>
+        <mu:python module="tests.basic" />
+        <mu:stylesheet path="styles.css" />
+    </mu:resources>
+    <mu:layout on_load="@basic.on_load" />
+    <filler mu:height="1" mu:class="header">
+        <text>Hello, world</text>
     </filler>
     <filler mu:height="1">
         <edit caption="Edit: ">
-            <mu:signal name="change" callback="@on_edit_change" />
-            <mu:signal name="postchange" callback="@on_edit_postchange" />
+            <mu:signal name="change" callback="@basic.on_edit_change" />
         </edit>
     </filler>
     <filler mu:height="1"><button
-            on_press="@quit_callback"
+            on_press="@basic.quit_callback"
         >Quit</button></filler>
-    <solidfill mu:height="3">.</solidfill>
-    <filler mu:height="2"><divider /></filler>
-    <filler mu:height="1">
-        <progressbar
-            normal="pb_empty"
-            complete="pb_full"
-            current="57"
-        />
-    </filler>
-    <filler valign="top" class="dark">
-        <text>This should be dark</text>
-    </filler>
-    <padding mu:height="2" left="5" right="2">
-        <filler>
-            <text id="padded">Left is padded by 5; right is be 2</text>
-        </filler>
-    </padding>
-    <customwidget />
-    <customwidgetfromxml mu:height="1" />
     <scrollbar>
-        <listbox id="dynamic" />
+        <listbox mu:id="dynamic_listbox" />
     </scrollbar>
 </pile>
 ```
 
 CSS:
 ```css
-:root {
-    --default-color: dark green;
-    --my-var: light red;
-}
-
-edit {
-    color: var(--default-color);
-}
-
 #root {
-    color: black;
-    background: var(--my-var);
+    color: dark blue;
+    background: light gray;
 }
 
-.custom {
-    color: light green;
+.header {
+    color:
+        dark red,
+        bold,
+        italics;
+}
+
+.listbox-child {
     background: dark gray;
 }
-
-.dark {
-    color: black;
-    background: white;
-}
-
-button {
-    color: yellow;
-}
-
-button:focus {
-    color: light red;
-}
-
-scrollbar {
-    color: light blue;
-}
-
-scrollbar:focus {
-    color: black;
-}
 ```
 
-Layouts use the `LayoutResourceHandler` class to access custom widgets, palettes, CSS variables, and widget callbacks. The `LayoutResourceHandler` class can also be used to dynamically create additional widgets within the layout in the `on_load()` method, or handle the layout's `on_enter()` and `on_exit()` methods.
+Python modules can be used to define resources such as callbacks and various data, as well as the three layout lifecycle hooks: `on_load`, `on_enter`, and `on_exit`. The `on_load` hook and other callbacks are defined in the `tests.basic` module as referenced in the XML:
 ```python
-class CustomResources(LayoutResourceHandler):
-    def __init__(self, layout):
-        super().__init__(
-            layout,
-            palettes=[
-                ("pb_empty", "white", "black"),
-                ("pb_full", "black", "light blue"),
-            ],
-            css_variables={"--my-var": "light gray"}, # override any variables in the stylesheet's ':root' declaration
-        )
-    
-    def quit_callback(self, w):
-        raise urwid.ExitMainLoop()
-    
-    def on_edit_change(self, w: urwid.Edit, full_text):
-        w.set_caption(f"Edit ({full_text}): ")
-    
-    def on_edit_postchange(self, w, text):
-        widget = self.layout.get_widget_by_id("header_text")
-        if isinstance(widget, urwid.Text):
-            widget.set_text(text)
-    
-    def on_load(self):
-        # get the widget with id="dynamic" from the XML
-        widget = self.layout.get_widget_by_id("dynamic")
-        # dynamically add 10 buttons to the listbox
-        if isinstance(widget, urwid.ListBox):
-            widget.body.extend(
-                [
-                    self.layout.style_widget( # use self.layout.style_widget() to apply the '#root' style
-                        urwid.Button(f"Dynamic Button {i}"), id="root"
-                    )
-                    for i in range(10)
-                ]
-            )
+import urwid
+from modern_urwid import CompileContext, LayoutNode
+from modern_urwid.compiler import create_wrapper
 
-    def on_enter(self):
-        pass
-    
-    def on_exit(self):
-        pass
+def on_load(ctx: CompileContext):
+    # get the widget with id "dynamic_listbox"
+    my_listbox: urwid.ListBox = ctx.get_local("main").get_widget_by_id( # "main" references the layout name
+        "dynamic_listbox"
+    )
+
+    # load the urwid palette names for the widgets we will create
+    _, palette, focus_palette = ctx.style_registry.get(
+        create_wrapper("button", classes="listbox-child")
+    )
+
+    # add children to the listbox
+    my_listbox.body.extend(
+        [
+            urwid.AttrMap(urwid.Button(f"This is custom button #{i}"), palette, focus_palette)
+            for i in range(10)
+        ]
+    )
+
+def on_edit_change(node: LayoutNode, ctx: CompileContext, w: urwid.Edit, full_text):
+    w.set_caption(f"Edit ({full_text}): ")
+
+def quit_callback(node: LayoutNode, ctx: CompileContext, w):
+    raise urwid.ExitMainLoop()
 ```
 
-Layouts can then be registered with the manager with `register()`. Before the MainLoop can be run, a layout must be activated with `switch()`.
+Before the MainLoop can be run, a layout must be activated with `switch()`.
 ```python
-manager.register("my_layout", layout)
-manager.switch("my_layout") # switch to the layout named "my_layout"
-manager.run() # call urwid.MainLoop.run
+manager.switch("main") # switch to the layout named "main"
+manager.run() # calls urwid.MainLoop.run
 ```
 
 
 ## Rendering custom widgets
-Custom widgets can be made with the `@manager.register_widget()` decorator:
+Custom widgets can be made by extending the `WidgetBuilder` class and registered with the `@context.widget_registry.register()` decorator:
 ```python
-@manager.register_widget()
+@context.widget_registry.register()
 class CustomWidget(WidgetBuilder):
+    tag = "customwidget"
+
     def build(self, **kwargs):
-        return urwid.Filler(urwid.Text("This is a custom widget!"))
+        return urwid.Filler(
+            urwid.Text(f"This is a custom widget with tag <{self.node.tag}>")
+        )
 ```
 
-Custom widgets can also be created from XML with the `self.render_from_xml()` method:
-```python
-@manager.register_widget()
-class CustomWidgetFromXML(WidgetBuilder):
-    def build(self, **kwargs):
-        parser = self.render_from_xml(
-            Path("path/to/my_custom_widget.xml",
-            css_path=Path("path/to/my_custom_widget.css"),
-        )
+Alternately, you can use the `<mu:widget module="..." />` tag in `<mu:resources>...</mu:resources>`, which will automatically register all classes extending `WidgetBuilder` in the given module.
 
-        # don't forget to register any custom palettes that
-        # may be parsed from the widget's stylesheet:
-        manager.register_palette(parser.get_palettes())
-        return parser.get_root()
+Custom widgets can also be created from XML with the `parse_xml_layout()` method:
+```python
+@context.widget_registry.register()
+class AnotherCustomWidget(WidgetBuilder):
+    tag = "customwidgetfromxml"
+
+    def build(self, **kwargs):
+        return parse_xml_layout(
+            self.context.resolve_path("path/to/my/widget.xml"),
+            self.context,
+        )[0]
 ```
 
 ```{note}

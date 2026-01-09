@@ -27,25 +27,47 @@ class LocalData:
 
 
 class CompileContext:
-    """Compile context applied to all layouts"""
+    """Compile context applied to all layouts
+
+    :param base_dir: The root directory for all referenced files
+    :type base_dir: pathlib.Path
+    :param widget_registry: The widget registery used for all layouts
+    :type widget_registry: WidgetRegistry, optional
+    :param style_registry: The style registery used for all layouts
+    :type style_registry: StyleRegistry, optional
+    :param module_registry: The module registery used for all layouts
+    :type module_registry: ModuleRegistry, optional
+    """
 
     def __init__(
         self,
         base_dir: Path,
-        widget_registry: WidgetRegistry = WidgetRegistry(),
-        style_registry: StyleRegistry = StyleRegistry(),
-        module_registry: ModuleRegistry = ModuleRegistry(),
+        widget_registry: WidgetRegistry = None,
+        style_registry: StyleRegistry = None,
+        module_registry: ModuleRegistry = None,
     ):
         self.base_dir = base_dir.resolve()
+        if widget_registry is None:
+            widget_registry = WidgetRegistry()
         self.widget_registry = widget_registry
+        if style_registry is None:
+            style_registry = StyleRegistry()
         self.style_registry = style_registry
+        if module_registry is None:
+            module_registry = ModuleRegistry()
         self.module_registry = module_registry
         self.local_data: dict[str, LocalData] = {}
         self.current_key: Union[str, None] = None
         self.custom_data: dict[str, Any] = {}
 
     def resolve_path(self, path: Union[str, Path]) -> Path:
-        """Resolve a path under the base directory"""
+        """Resolve a path under the base directory
+
+        :param path: The path to resolve
+        :type path: str | pathlib.Path
+        :return: The resolved path
+        :rtype: pathlib.Path
+        """
         return (self.base_dir / Path(path)).resolve()
 
     def add_local(self, name: str):
@@ -74,7 +96,5 @@ class CompileContext:
         self.custom_data[key] = value
 
     def get_custom(self, key: str, default: Any = None):
-        """Get a custom data value
-        
-        """
+        """Get a custom data value"""
         return self.custom_data.get(key, default)

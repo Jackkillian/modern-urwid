@@ -1,0 +1,15 @@
+#root {
+    color: dark blue;
+    background: light gray;
+}
+
+.header {
+    color:
+        dark red,
+        bold,
+        italics;
+}
+
+.listbox-child {
+    background: dark gray;
+}

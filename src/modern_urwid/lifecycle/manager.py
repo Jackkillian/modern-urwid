@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from modern_urwid.context import CompileContext
 
 
-class Manager:
+class LifecycleManager:
     """
     Manages multiple layouts and shared resources between them.
     """
@@ -62,7 +62,6 @@ class Manager:
                     raise ValueError(
                         f"{controller_cls.__name__}.name must be the same as the provided name: '{key}'"
                     )
-                name = controller.name
             else:
                 raise TypeError(
                     f"Provided resource for controller ({controller_cls.__name__}) does not extend the Controller class"
@@ -71,32 +70,41 @@ class Manager:
             controller = Controller(self, self.context)
             controller.name = key
             if "on_load" in layout_config:
+                on_load_res = layout_config["on_load"]
+                if not isinstance(on_load_res, UnresolvedResource):
+                    raise ValueError("on_load is not a resource reference")
                 if callable(
                     resource := resolve_resource(
                         self.context.module_registry,
-                        UnresolvedResource(layout_config["on_load"]),
+                        on_load_res,
                     )
                 ):
                     controller.on_load = wrap_callback(resource, self.context)
             if "on_enter" in layout_config:
+                on_enter_res = layout_config["on_enter"]
+                if not isinstance(on_enter_res, UnresolvedResource):
+                    raise ValueError("on_enter is not a resource reference")
                 if callable(
                     resource := resolve_resource(
                         self.context.module_registry,
-                        UnresolvedResource(layout_config["on_enter"]),
+                        on_enter_res,
                     )
                 ):
                     controller.on_enter = wrap_callback(resource, self.context)
             if "on_exit" in layout_config:
+                on_exit_res = layout_config["on_exit"]
+                if not isinstance(on_exit_res, UnresolvedResource):
+                    raise ValueError("on_exit is not a resource reference")
                 if callable(
                     resource := resolve_resource(
                         self.context.module_registry,
-                        UnresolvedResource(layout_config["on_exit"]),
+                        on_exit_res,
                     )
                 ):
                     controller.on_exit = wrap_callback(resource, self.context)
 
-        self.layouts[name] = node
-        self.controllers[name] = controller
+        self.layouts[controller.name] = node
+        self.controllers[controller.name] = controller
         for name, attr in controller.__class__.__dict__.items():
             widget_id = getattr(attr, "_widget_id", None)
             if widget_id is not None:

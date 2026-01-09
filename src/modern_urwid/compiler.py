@@ -237,6 +237,7 @@ def parse_xml_layout(
         name = Path(file_path).stem
     context.add_local(name)
 
+    # TODO: ignore comments
     root = etree.parse(file_path).getroot()
     node = parse_element(root)
     if not isinstance(node, LayoutNode):

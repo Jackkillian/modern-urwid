@@ -6,7 +6,7 @@ from modern_urwid.style.css_parser import create_wrapper
 
 if TYPE_CHECKING:
     from modern_urwid.context import CompileContext
-    from modern_urwid.lifecycle.manager import Manager
+    from modern_urwid.lifecycle.manager import LifecycleManager
     from modern_urwid.widgets.builder import WidgetBuilder
 
 
@@ -19,12 +19,12 @@ class Controller(object):
 
     def __init__(
         self,
-        manager: Union["Manager", None] = None,
+        manager: Union["LifecycleManager", None] = None,
         context: Union["CompileContext", None] = None,
     ):
+        self.__dict__ = self._state
         if not hasattr(self, "name"):
             self.name = None
-        self.__dict__ = self._state
         if context is not None:
             self.context = context
             self.local_data = context.get_local(self.name)
@@ -57,13 +57,13 @@ class Controller(object):
         return builder.after_build(widget)
 
     def on_load(self):
-        """Called when loading the parent layout in :meth:`~modern_urwid.lifecycle.manager.Manager.register`."""
+        """Called when loading the parent layout in :meth:`~modern_urwid.lifecycle.manager.LifecycleManager.register`."""
         pass
 
     def on_enter(self):
-        """Called when the parent layout is rendered on the mainloop with :meth:`~modern_urwid.lifecycle.manager.Manager.switch`."""
+        """Called when the parent layout is rendered on the mainloop with :meth:`~modern_urwid.lifecycle.manager.LifecycleManager.switch`."""
         pass
 
     def on_exit(self):
-        """Called when the parent layout is removed from the mainloop with :meth:`~modern_urwid.lifecycle.manager.Manager.switch`."""
+        """Called when the parent layout is removed from the mainloop with :meth:`~modern_urwid.lifecycle.manager.LifecycleManager.switch`."""
         pass

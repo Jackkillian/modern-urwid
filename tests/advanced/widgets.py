@@ -8,7 +8,7 @@ class CustomWidget2(WidgetBuilder):
 
     def build(self, **kwargs):
         return parse_xml_layout(
-            self.context.resolve_path("resources/widgets/widget.xml"),
+            self.context.resolve_path("widgets/widget.xml"),
             self.context,
         )[0]
 

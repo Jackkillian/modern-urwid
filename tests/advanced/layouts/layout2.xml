@@ -3,9 +3,9 @@
     mu:selectable="True"
 >
     <mu:resources>
-        <mu:python path="resources/extra.py" />
-        <mu:widget module="tests.resources.widgets" />
-        <mu:stylesheet path="resources/styles/styles.css">
+        <mu:python path="extra.py" />
+        <mu:widget module="tests.advanced.widgets" />
+        <mu:stylesheet path="styles/styles.css">
             <mu:var name="--my-var" value="light gray" />
         </mu:stylesheet>
     </mu:resources>

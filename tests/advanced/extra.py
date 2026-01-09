@@ -1,7 +1,7 @@
 import urwid
 
 from modern_urwid import CompileContext, Controller, LayoutNode, assign_widget
-from tests.resources.widgets import CustomButton
+from tests.advanced.widgets import CustomButton
 
 
 class MyController(Controller):
