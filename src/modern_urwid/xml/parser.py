@@ -37,6 +37,15 @@ def parse_attrs(kwargs: dict):
 
 
 def parse_element(element: "Element", parent=None) -> Node:
+    """Get the AST representation of an XML element
+
+    :param element: The XML element
+    :type element: lxml.etree.Element
+    :param parent: The AST representation of the parent of this XML element
+    :type parent: Node, optional
+    :return: An AST node
+    :rtype: Node
+    """
     children = []
     meta = []
 
