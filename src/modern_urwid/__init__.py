@@ -1,4 +1,4 @@
-from .compiler import parse_xml_layout
+from .compiler import compile_widget, parse_xml_layout
 from .constants import RESOURCE_CHAR, XML_NS
 from .context import CompileContext
 from .decorators import assign_widget
@@ -25,5 +25,6 @@ __all__ = [
     "WidgetRegistry",
     "LayoutNode",
     "assign_widget",
+    "compile_widget",
     "parse_xml_layout",
 ]

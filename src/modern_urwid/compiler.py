@@ -1,13 +1,14 @@
 import inspect
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, Union
+from typing import Union
 
 import urwid
 from lxml import etree
 from typing_extensions import TypedDict
 
 from .constants import DEFAULT_STYLE
+from .context import CompileContext
 from .resource.dummies import UnresolvedResource
 from .resource.utils import import_module, resolve_resource, wrap_callback
 from .style.css_parser import create_wrapper, parse_stylesheet
@@ -15,10 +16,6 @@ from .widgets.builder import WidgetBuilder
 from .widgets.size_options import SizeOptions
 from .xml.ast import LayoutNode, MetaNode
 from .xml.parser import parse_element
-
-if TYPE_CHECKING:
-    from modern_urwid.context import CompileContext
-
 
 if sys.version_info < (3, 11):
     from typing_extensions import NotRequired, Required, TypedDict
@@ -230,7 +227,7 @@ def compile_node(
 
 def parse_xml_layout(
     file_path: Union[Path, str],
-    context: "CompileContext",
+    context: CompileContext,
     name: Union[str, None] = None,
 ) -> tuple[urwid.Widget, Metadata]:
     if name is None:
@@ -244,3 +241,31 @@ def parse_xml_layout(
         raise ValueError("Root tag must an urwid widget")
     widget, _, meta = compile_node(node, context)
     return widget, meta
+
+
+def compile_widget(
+    file_path: Union[Path, str], context: Union[CompileContext, None] = None
+) -> tuple[urwid.Widget, dict[str, urwid.Widget]]:
+    """Compile an XML file to an urwid Widget
+
+    :param file_path: The file path to the layout file
+    :type file_path: pathlib.Path | str
+    :param context: The compile context to use when parsing. May be needed for styling.
+    :type context: CompileContext, optional
+    :return: Two values: the root urwid :class:`~urwid.Widget`, and a dictionary
+        mapping any widgets to their respective ``mu:id`` tag
+    :rtype: tuple[urwid.Widget, dict[str, urwid.Widget]]
+    """
+    if isinstance(file_path, str):
+        file_path = Path(file_path)
+
+    if context is None:
+        context = CompileContext(file_path.parent)
+
+    root = etree.parse(file_path).getroot()
+    node = parse_element(root)
+
+    if not isinstance(node, LayoutNode):
+        raise ValueError("Root tag must an urwid widget")
+    widget, _, _ = compile_node(node, context)
+    return widget, context.get_local().mapped_widgets
