@@ -9,7 +9,14 @@ description = "An urwid library for creating TUIs from XML and CSS"
 readme = "README.md"
 requires-python = ">=3.9"
 license = "MIT"
-keywords = []
+keywords = [
+    "css",
+    "xml",
+    "urwid",
+    "python",
+    "styling",
+    "tui",
+]
 authors = [
   { name = "Jackkillian", email = "jackkillian@tuta.com" },
 ]
@@ -37,7 +44,7 @@ dependencies = [
 ]
 
 [project.urls]
-Documentation = "https://github.com/Jackkillian/modern-urwid#readme"
+Documentation = "https://modern-urwid.readthedocs.io/en/latest/"
 Issues = "https://github.com/Jackkillian/modern-urwid/issues"
 Source = "https://github.com/Jackkillian/modern-urwid"
 
