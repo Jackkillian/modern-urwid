@@ -3,13 +3,15 @@ from typing import TYPE_CHECKING, Union
 if TYPE_CHECKING:
     from modern_urwid.widgets.builder import WidgetBuilder
 
-from modern_urwid.widgets.generic_builder import GenericWidgetBuilder
+from modern_urwid.widgets.builders import GenericWidgetBuilder, ListBoxBuilder
+
+DEFAULT_BUILDERS = [ListBoxBuilder]
 
 
 class WidgetRegistry:
     def __init__(self, builders: list[type["WidgetBuilder"]] = []):
         self.builders: dict[str, type["WidgetBuilder"]] = {}
-        for builder in builders:
+        for builder in DEFAULT_BUILDERS + builders:
             self.register(builder)
 
     def register(self, builder_cls: Union[type["WidgetBuilder"], None] = None):

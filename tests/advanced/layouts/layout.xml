@@ -74,6 +74,10 @@
             <text markup="Text 9" align="center" />
         </gridflow>
     </filler>
+    <listbox mu:class="blue">
+        <text markup="Not dynamic #1" align="center" />
+        <text markup="Not dynamic #2" align="center" />
+    </listbox>
     <filler valign="middle"><text
         >This should inherit the pile style</text></filler>
     <columns mu:height="1">

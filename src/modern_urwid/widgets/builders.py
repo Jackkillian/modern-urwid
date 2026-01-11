@@ -2,9 +2,6 @@ import inspect
 
 import urwid
 
-from modern_urwid.resource.dummies import UnresolvedResource, UnresolvedTemplate
-from modern_urwid.resource.utils import wrap_callback
-
 from .builder import WidgetBuilder
 
 
@@ -24,20 +21,7 @@ class GenericWidgetBuilder(WidgetBuilder):
             return urwid.Filler(
                 urwid.Text(f"Could not find widget {self.node.tag} in urwid")
             )
-
-        kwargs = self.node.attrs.copy()
-        kwargs.pop("class", None)
-        kwargs.pop("id", None)
-
-        for k, v in kwargs.items():
-            if isinstance(v, UnresolvedResource):
-                resource = self.resolve_resource(v)
-                if callable(resource):
-                    resource = wrap_callback(resource, self.node, self.context)
-                kwargs[k] = resource
-            elif isinstance(v, UnresolvedTemplate):
-                kwargs[k] = self.resolve_template(v)
-
+        kwargs = self.resolve_attrs()
         if issubclass(
             cls,
             urwid.WidgetContainerMixin,
@@ -89,3 +73,15 @@ class GenericWidgetBuilder(WidgetBuilder):
             setattr(widget, "original_widget", children[0][0])
         else:
             raise ValueError(f"Could not set children for widget {widget}")
+
+
+class ListBoxBuilder(WidgetBuilder):
+    tag = "listbox"
+
+    def build(self) -> urwid.ListBox:
+        kwargs = {"body": urwid.SimpleFocusListWalker([])}
+        kwargs.update(self.resolve_attrs())
+        return urwid.ListBox(**kwargs)
+
+    def attach_children(self, widget, children):
+        widget.body.extend([child for child, sizing, _ in children])

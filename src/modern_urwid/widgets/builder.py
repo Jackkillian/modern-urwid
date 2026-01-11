@@ -1,8 +1,8 @@
 import string
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Any, Union
 
 from modern_urwid.resource.dummies import UnresolvedResource, UnresolvedTemplate
-from modern_urwid.resource.utils import resolve_resource
+from modern_urwid.resource.utils import resolve_resource, wrap_callback
 
 if TYPE_CHECKING:
     from urwid import AttrMap, Widget
@@ -67,3 +67,21 @@ class WidgetBuilder:
                 str(self.resolve_resource(UnresolvedResource(variable))),
             )
         return value
+
+    def resolve_attrs(self) -> dict[str, Any]:
+        """Resolve any unresolved resources in this node's attributes
+
+        :return: A dictionary representing this builder's node's attributes
+        :rtype: dict[str, typing.Any]"""
+        if self.node is None:
+            return {}
+        kwargs = self.node.attrs.copy()
+        for k, v in kwargs.items():
+            if isinstance(v, UnresolvedResource):
+                resource = self.resolve_resource(v)
+                if callable(resource):
+                    resource = wrap_callback(resource, self.node, self.context)
+                kwargs[k] = resource
+            elif isinstance(v, UnresolvedTemplate):
+                kwargs[k] = self.resolve_template(v)
+        return kwargs
