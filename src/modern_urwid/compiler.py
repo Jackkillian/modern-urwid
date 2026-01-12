@@ -243,6 +243,12 @@ def parse_xml_layout(
     return widget, meta
 
 
+def gen_random_key(length):
+    characters = string.ascii_letters + string.digits
+    random_string = ''.join(random.choices(characters, k=length))
+    return random_string
+
+
 def compile_widget(
     file_path: Union[Path, str], context: Union[CompileContext, None] = None
 ) -> tuple[urwid.Widget, dict[str, urwid.Widget]]:
@@ -261,6 +267,8 @@ def compile_widget(
 
     if context is None:
         context = CompileContext(file_path.parent)
+    key = gen_random_key(16)
+    context.add_local(key)
 
     root = etree.parse(file_path).getroot()
     node = parse_element(root)
@@ -268,4 +276,4 @@ def compile_widget(
     if not isinstance(node, LayoutNode):
         raise ValueError("Root tag must an urwid widget")
     widget, _, _ = compile_node(node, context)
-    return widget, context.get_local().mapped_widgets
+    return widget, context.get_local(key).mapped_widgets
