@@ -2,6 +2,8 @@ import inspect
 import sys
 from pathlib import Path
 from typing import Union
+import string
+import random
 
 import urwid
 from lxml import etree
