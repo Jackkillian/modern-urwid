@@ -2,7 +2,11 @@ import string
 from typing import TYPE_CHECKING, Any, Union
 
 from modern_urwid.resource.dummies import UnresolvedResource, UnresolvedTemplate
-from modern_urwid.resource.utils import resolve_resource, wrap_callback
+from modern_urwid.resource.utils import (
+    is_class_method,
+    resolve_resource,
+    wrap_callback,
+)
 
 if TYPE_CHECKING:
     from urwid import AttrMap, Widget
@@ -80,7 +84,10 @@ class WidgetBuilder:
             if isinstance(v, UnresolvedResource):
                 resource = self.resolve_resource(v)
                 if callable(resource):
-                    resource = wrap_callback(resource, self.node, self.context)
+                    if is_class_method(self.context.module_registry, v):
+                        resource = wrap_callback(resource, self.node)
+                    else:
+                        resource = wrap_callback(resource, self.node, self.context)
                 kwargs[k] = resource
             elif isinstance(v, UnresolvedTemplate):
                 kwargs[k] = self.resolve_template(v)

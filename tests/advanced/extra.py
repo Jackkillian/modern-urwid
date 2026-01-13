@@ -23,21 +23,18 @@ class MyController(Controller):
             ]
         )
 
-    # TODO: this doesnt need to be wrapped with ctx...
-    def switch_controller(self, node: LayoutNode, ctx: CompileContext, w: urwid.Button):
+    def switch_controller(self, node: LayoutNode, w: urwid.Button):
         self.manager.switch("layout2")
 
-    def on_edit_change(
-        self, node: LayoutNode, ctx: CompileContext, w: urwid.Edit, full_text
-    ):
+    def on_edit_change(self, node: LayoutNode, w: urwid.Edit, full_text):
         w.set_caption(f"Edit ({full_text}): ")
 
-    def on_edit_postchange(self, node: LayoutNode, ctx: CompileContext, w, text):
+    def on_edit_postchange(self, node: LayoutNode, w, text):
         widget = self.local_data.get_widget_by_id("header_text")
         if isinstance(widget, urwid.Text):
             widget.set_text(text)
 
-    def quit_callback(self, node: LayoutNode, ctx: CompileContext, w):
+    def quit_callback(self, node: LayoutNode, w):
         raise urwid.ExitMainLoop()
 
     def on_unhandled_input(self, data):
@@ -56,5 +53,5 @@ class SecondController(Controller):
     def on_load(self):
         self.text.set_text("Welcome to modern-urwid")
 
-    def switch_controller(self, node: LayoutNode, ctx: CompileContext, w: urwid.Button):
+    def switch_controller(self, node: LayoutNode, w: urwid.Button):
         self.manager.switch("main")

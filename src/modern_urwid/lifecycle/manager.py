@@ -161,7 +161,7 @@ class LifecycleManager:
         """
         return self.loop
 
-    def on_unhandled_input(self, data) -> bool:
+    def on_unhandled_input(self, data) -> Union[bool, None]:
         if self.current:
             return self.controllers[self.current].on_unhandled_input(data)
         return False

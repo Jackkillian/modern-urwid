@@ -28,6 +28,36 @@ def wrap_callback(callback: Callable, *args) -> Callable:
     return lambda *_args, **_kwargs: callback(*args, *_args, **_kwargs)
 
 
+def is_class_method(
+    module_registry: "ModuleRegistry", unresolved: "UnresolvedResource"
+):
+    path = unresolved.path
+    if path.startswith("@"):
+        path = path[1:]
+
+    attrs = path.split(".")
+    module_name = attrs.pop(0)
+    module = module_registry.get(module_name)
+    target = module
+    for attr in attrs:
+        if isinstance(target, dict):
+            if attr not in target:
+                raise AttributeError(
+                    f"{target} does not have attribute '{attr}' (reading '{unresolved.path}')"
+                )
+            target = target[attr]
+        elif hasattr(target, attr):
+            target = getattr(target, attr)
+        else:
+            raise AttributeError(
+                f"{target} does not have attribute '{attr}' (reading '{unresolved.path}')"
+            )
+
+        if inspect.isclass(target) and issubclass(target, Controller):
+            return True
+    return False
+
+
 def resolve_resource(
     module_registry: "ModuleRegistry",
     unresolved: "UnresolvedResource",

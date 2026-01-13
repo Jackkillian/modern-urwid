@@ -1,9 +1,9 @@
 import inspect
+import random
+import string
 import sys
 from pathlib import Path
 from typing import Union
-import string
-import random
 
 import urwid
 from lxml import etree
@@ -12,7 +12,12 @@ from typing_extensions import TypedDict
 from .constants import DEFAULT_STYLE
 from .context import CompileContext
 from .resource.dummies import UnresolvedResource
-from .resource.utils import import_module, resolve_resource, wrap_callback
+from .resource.utils import (
+    import_module,
+    is_class_method,
+    resolve_resource,
+    wrap_callback,
+)
 from .style.css_parser import create_wrapper, parse_stylesheet
 from .widgets.builder import WidgetBuilder
 from .widgets.size_options import SizeOptions
@@ -171,7 +176,10 @@ def compile_node(
             raise ValueError("Callback attribute not present on <mu:signal> tag")
 
         if callable(callback := resolve_resource(ctx.module_registry, resource)):
-            urwid.connect_signal(widget, name, wrap_callback(callback, node, ctx))
+            if is_class_method(ctx.module_registry, resource):
+                urwid.connect_signal(widget, name, wrap_callback(callback, node))
+            else:
+                urwid.connect_signal(widget, name, wrap_callback(callback, node, ctx))
         else:
             raise TypeError(f"Resource at {resource} is not callable.")
 
@@ -259,7 +267,7 @@ def parse_xml_layout(
 
 def gen_random_key(length):
     characters = string.ascii_letters + string.digits
-    random_string = ''.join(random.choices(characters, k=length))
+    random_string = "".join(random.choices(characters, k=length))
     return random_string
 
 
