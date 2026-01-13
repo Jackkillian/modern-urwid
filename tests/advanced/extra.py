@@ -40,6 +40,11 @@ class MyController(Controller):
     def quit_callback(self, node: LayoutNode, ctx: CompileContext, w):
         raise urwid.ExitMainLoop()
 
+    def on_unhandled_input(self, data):
+        if data == "q":
+            raise urwid.ExitMainLoop()
+        return False
+
 
 class SecondController(Controller):
     name = "layout2"
