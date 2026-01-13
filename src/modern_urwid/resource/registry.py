@@ -25,6 +25,9 @@ class ModuleRegistry:
         """
         self.modules[name] = module
 
+    def is_registered(self, name: str):
+        return name in self.modules
+
     def get(self, name: str) -> ModuleType:
         """Get a registered module
 

@@ -107,6 +107,18 @@ def compile_node(
             file_path = ctx.resolve_path(file_path)
         else:
             file_path = None
+
+        if alias := tag.get("as"):
+            name = alias
+        elif module_path := tag.get("module", ""):
+            name = module_path.split(".")[-1]
+        elif file_path:
+            name = file_path.stem
+        else:
+            name = ""
+        if ctx.module_registry.is_registered(name):
+            continue
+
         if (result := import_module(tag.get("module"), file_path)) is None:
             raise ValueError(
                 "Could not get attribute 'module' or 'path' for mu:python tag"
