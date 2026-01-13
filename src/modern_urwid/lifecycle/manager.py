@@ -30,6 +30,7 @@ class LifecycleManager:
         self.layouts: dict[str, urwid.Widget] = {}
         self.current: Union[str, None] = None
         self.context = context
+        self.loop._unhandled_input = self.on_unhandled_input
 
     def register(self, layout_path: Union[str, Path], key: Union[str, None] = None):
         """Register a  new layout
@@ -159,3 +160,8 @@ class LifecycleManager:
         :rtype: urwid.MainLoop
         """
         return self.loop
+
+    def on_unhandled_input(self, data) -> bool:
+        if self.current:
+            return self.controllers[self.current].on_unhandled_input(data)
+        return False

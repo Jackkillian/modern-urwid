@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Union, Any
+from typing import TYPE_CHECKING, Any, Union
 
 import urwid
 
@@ -28,15 +28,16 @@ class Controller(metaclass=SingletonMeta):
     """
 
     def __init__(
-            self,
-            manager: Union["LifecycleManager", None] = None,
-            context: Union["CompileContext", None] = None,
-        ):
-            if not hasattr(self, "name"):
-                self.name = None
-            self._setup(manager, context)
+        self,
+        manager: Union["LifecycleManager", None] = None,
+        context: Union["CompileContext", None] = None,
+    ):
+        if not hasattr(self, "name"):
+            self.name = None
+        self._setup(manager, context)
 
-    def _setup(self,
+    def _setup(
+        self,
         manager: Union["LifecycleManager", None] = None,
         context: Union["CompileContext", None] = None,
     ):
@@ -81,4 +82,10 @@ class Controller(metaclass=SingletonMeta):
 
     def on_exit(self):
         """Called when the parent layout is removed from the mainloop with :meth:`~modern_urwid.lifecycle.manager.LifecycleManager.switch`."""
+        pass
+
+    def on_unhandled_input(
+        self, data: Union[str, tuple[str, int, int, int]]
+    ) -> Union[bool, None]:
+        """Called when the mainloop receieves unhandled input. Should return True if the input is handled"""
         pass
